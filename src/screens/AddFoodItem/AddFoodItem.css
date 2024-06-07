@@ -1,0 +1,91 @@
+/* Overall Container */
+.addFoodItem{
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+.add-food-item-container {
+    width: 450px; /* Adjust width as needed */
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px; /* Center the form */
+  }
+  
+  /* Heading */
+  h2 {
+    text-align: center;
+    color: #d32f2f; /* Red accent color */
+    margin-bottom: 30px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Input Groups */
+  .input-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  /* Input Fields */
+  input[type="text"],
+  input[type="number"],
+  input[type="file"],
+  textarea,
+  select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+  
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="file"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #d32f2f; /* Red on focus */
+    outline: none;
+  }
+  
+  textarea {
+    min-height: 120px;
+    resize: vertical; /* Allow vertical resizing */
+  }
+  
+  /* File Input */
+  input[type="file"] {
+    padding: 8px;
+  }
+  
+  /* Select Dropdown */
+  select {
+    height: 45px;
+  }
+  
+  /* Add Item Button */
+  button[type="submit"] {
+    background-color: #d32f2f;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #c62828; /* Darker red on hover */
+  }
+  

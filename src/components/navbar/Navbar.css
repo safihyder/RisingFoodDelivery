@@ -1,0 +1,147 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Basic Styling */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  /* Example background */
+  position: relative;
+  /* Make navbar sticky */
+  top: 0;
+  width: 100%;
+  z-index: 10;
+  /* Ensure it's above content */
+  background-color: transparent;
+}
+
+.logo {
+  margin-left: 20px;
+  cursor: pointer;
+}
+
+.logo img {
+  height: 85px;
+  /* Adjust logo size */
+  /* margin-right: 20px; */
+}
+
+.nav-links {
+  list-style: none;
+  /* Remove default list styling */
+  display: flex;
+  margin-right: 15px;
+  align-items: center;
+}
+
+.nav-links li {
+  margin-left: 2rem;
+  /* Space between links */
+  cursor: pointer;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s ease;
+  font-size: 15px;
+}
+
+.nav-links a:hover {
+  color: #fff;
+  /* Example hover color (food-related) */
+}
+
+/* Call-to-Action Button Styling */
+.cta-button button {
+  background-color: transparent;
+  /* Example button background */
+  color: black;
+  border: 1px solid rgba(154, 0, 36, 1);
+  padding: 10px;
+  border-radius: 5px;
+  /* Rounded corners */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+.cta-button button img{
+  height: 20px;
+}
+
+.cta-button button:hover {
+  border: 1px solid white;
+  color: white;
+  /* Darker shade on hover */
+}
+
+
+/* Responsive Burger Menu Styling */
+.burger {
+  display: none;
+  /* Hide on larger screens */
+  cursor: pointer;
+}
+
+.burger div {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  margin: 5px;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Media Query for Smaller Screens */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .burger {
+    display: block;
+  }
+
+  .nav-links.open {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    justify-content: center;
+    width: 60%;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: #dd7730;
+    border-radius: 3px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  }
+
+
+  .nav-links.open li {
+    margin: 1rem 0;
+  }
+
+  .nav-links.open li Link:hover {
+    color: white;
+  }
+
+  .burger.open .line1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+  }
+
+  .burger.open .line2 {
+    opacity: 0;
+  }
+
+  .burger.open .line3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+  }
+}
