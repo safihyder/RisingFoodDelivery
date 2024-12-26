@@ -1,10 +1,9 @@
-import React from 'react'
 import ReactDom from 'react-dom'
 const MODAL_STYLES = {
   position: 'fixed',
   top: '50%',
   left: '50%',
-  backgroundColor: 'rgb(34,34,34)',
+  backgroundColor: 'rgb(10 15 17)',
   transform: 'translate(-50%, -50%)',
   zIndex: 1000,
   height: '90%',
@@ -20,13 +19,13 @@ const OVERLAY_STYLES = {
   backgroundColor: 'rgba(0, 0, 0, .7)',
   zIndex: 1000
 }
-export default function Modal({ children, onClose}){
+export default function Modal({ children, onClose }) {
 
   return ReactDom.createPortal(
     <>
       <div style={OVERLAY_STYLES} />
       <div style={MODAL_STYLES}>
-        <button style={{ marginLeft: "90%", marginTop: "-35px",backgroundColor:"#e53935", fontSize:"20px",height:"35px",width:"35px",borderRadius:"5px" }} onClick={onClose}> X </button>
+        <button style={{ marginLeft: "90%", marginTop: "-35px", backgroundColor: "#e53935", fontSize: "20px", height: "35px", width: "35px", borderRadius: "5px" }} onClick={onClose}> X </button>
         {children}
       </div>
     </>,

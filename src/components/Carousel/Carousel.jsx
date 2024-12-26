@@ -28,7 +28,7 @@ const Carousele = () => {
    autoplay="true"
    data={data}
    time={4000}
-   width="100vw"
+   width="95vw"
    height="90vh"
    // captionStyle={captionStyle}
    radius="10px"

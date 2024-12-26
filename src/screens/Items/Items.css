@@ -1,0 +1,12 @@
+.items-container {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    row-gap: 50px;
+    margin: 50px 0;
+    column-gap: 5vw;
+    grid-template-columns: auto auto auto;
+    justify-content: center;
+    position: relative;
+
+}

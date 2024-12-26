@@ -1,12 +1,12 @@
 /* General Styles */
 .footer {
     background-color: #2c3e50; /* Dark, elegant background */
-    color: white;
+    color: black;
     padding: 40px 0;
     position: absolute;
     width: 100%;
     font-family: 'Arial', sans-serif; /* Choose your preferred font */
-    background-color: #172126;
+    background-color: white;
   }
   
   .container {
@@ -50,7 +50,7 @@
   }
   
   .footer-column a {
-    color: white;
+    color: black;
     text-decoration: none;
     transition: color 0.3s ease; /* Smooth color transition on hover */
   }

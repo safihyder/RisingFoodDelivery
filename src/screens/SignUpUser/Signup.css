@@ -10,7 +10,7 @@
     background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
     padding: 40px;
     border-radius: 10px;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px rgb(231 128 35);
     width: 450px;
     margin: 30px 20px;
   }
@@ -75,4 +75,3 @@
     color: #d32f2f;
     text-decoration: none;
   }
-  

@@ -1,13 +1,10 @@
-import React from 'react'
-import Navbar from '../../components/navbar/Navbar'
-import Card from '../../components/card/Card'
 import Fotor from '../../components/Fotor/Fotor'
+import Items from '../Items/Items'
 
 const Orderselection = () => {
   return (
     <div>
-      <Navbar position="relative" />
-      <Card />
+      <Items />
       <Fotor />
     </div>
   )

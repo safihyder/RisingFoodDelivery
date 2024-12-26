@@ -1,111 +1,102 @@
-import React, { useState } from 'react';
-import './AddRestaurant.css'; // Import the CSS file
-import Navbar from '../../components/navbar/Navbar';
-const AddRestaurant = () => {
+import { useState } from 'react';
+import PropTypes from 'prop-types';
+import './AddRestaurant.css';
+import { useDispatch, useSelector } from 'react-redux';
+import AppwriteResService from '../../appwrite/config'
+import { useNavigate } from 'react-router-dom';
+import { restaurants } from '../../store/restSlice';
+const AddRestaurant = ({ restaurant }) => {
+  const dispatch = useDispatch()
+  const userData = useSelector(state => state.auth.userData)
   const [formData, setFormData] = useState({
-    name: '',
-    cuisine: '',
-    address: '',
-    phoneNumber: '',
-    website: '',
-    logo: null,
-    description: '',
+    name: restaurant?.name,
+    address: restaurant?.address || '',
+    description: restaurant?.description || '',
   });
-
+  const [img, setImg] = useState(null);
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-    // const { name, value, files } = e.target;
-
-    // if (name === 'logo') {
-    //   setFormData({ ...formData, logo: files[0] });
-    // } else {
-    //   setFormData({ ...formData, [name]: value });
-    // }
+    setFormData((formData) => ({ ...formData, [name]: value }));
+    console.log(value)
   };
-
+  const setimgfile = (e) => {
+    setImg(e.target.files[0])
+    console.log(img)
+  }
+  const navigate = useNavigate()
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formDataToSubmit = new FormData();
-    for (let key in formData) {
-      formDataToSubmit.append(key, formData[key]);
-    }
-
-    try {
-      const response = await fetch('/api/restaurants', { 
-        method: 'POST',
-        body: formDataToSubmit,
-      });
-
-      if (response.ok) {
-        console.log('Restaurant added successfully!');
-        // Reset the form (optional)
-        setFormData({
-            resname: '',
-            address: '',
-            desc: '',
-            name: '',
-            number: '',
-            email: null,
-        });
-      } else {
-        console.error('Failed to add restaurant:', response.statusText);
-        // Handle error (e.g., display an error message to the user)
+    console.log(e)
+    if (restaurant) {
+      console.log(restaurant)
+      const file = img ? await AppwriteResService.uploadFile(img) : null
+      if (file) {
+        AppwriteResService.deleteFile(restaurant.image)
       }
-    } catch (error) {
-      console.error('Error adding restaurant:', error);
-      // Handle error
+      const dbRest = await AppwriteResService.updateDetail(restaurant.$id, {
+        ...formData,
+        image: file ? file.$id : undefined
+      })
+      if (dbRest) {
+        navigate(`/restaurant/${restaurant.$id}`)
+      }
+    } else {
+      const file = await AppwriteResService.uploadFile(img)
+      if (file) {
+        const fileId = file.$id
+        formData.image = fileId
+      }
+      const session = await AppwriteResService.AddRestaurant({ ...formData, userId: userData.$id })
+      console.log(session)
+      const dbPost = await AppwriteResService.getRestaurant(session.$id)
+      if (dbPost) {
+        dispatch(restaurants({ restaurant: dbPost }))
+        navigate(`/restaurant/${dbPost.$id}`)
+      }
     }
-  };
+  }
 
   return (
     <>
-    <Navbar position="relative"/>
-    <div className="addrestaurant">
-    <div className="add-restaurant-form-container">
-      <h2><img src="/Images/logo.png" alt="" />Add Your Restaurant</h2>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
-        {/* ... your input fields (name, cuisine, address, phoneNumber, website, description) ... */}
+      <div className="addrestaurant">
+        <div className="add-restaurant-form-container">
+          <h2><img src="/Images/logo.png" alt="" />Add Your Restaurant</h2>
+          <form onSubmit={handleSubmit} encType="multipart/form-data">
+            {/* ... your input fields (name, cuisine, address, phoneNumber, website, description) ... */}
 
-        <div className="input-group">
-          <label htmlFor="resname">Restaurant Name</label>
-          <input type="text" id="resname" name="resname" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="address">Restaurant Full Address</label>
-          <input type="text" id="address" name="address" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="desc">Restaurant Description</label>
-          <input type="text" id="desc" name="desc" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="resimg">Restaurant Image</label>
-          <input type="file" id="resimg" name="resimg" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="name">Owner's Name</label>
-          <input type="text" id="name" name="name" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="number">Owner's Number</label>
-          <input type="number" id="number" name="number" onChange={handleChange} />
-        </div>
-        <div className="input-group">
-          <label htmlFor="email">Owner's Email Address</label>
-          <input type="email" id="email" name="email" onChange={handleChange} />
+            <div className="input-group">
+              <label htmlFor="name">Restaurant Name</label>
+              <input type="text" id="name" name="name" onChange={handleChange} value={formData.name} />
+            </div>
+            <div className="input-group">
+              <label htmlFor="address">Restaurant Full Address</label>
+              <input type="text" id="address" name="address" onChange={handleChange} value={formData.address} />
+            </div>
+            <div className="input-group">
+              <label htmlFor="description">Restaurant Description</label>
+              <textarea cols={10} rows={5} type="text" id="description" name="description" onChange={handleChange} value={formData.description} />
+            </div>
+            <div className="input-group">
+              <label htmlFor="image">Restaurant Image</label>
+              <input type="file" id="image" name="image" onChange={setimgfile} />
+            </div>
+            <button type="submit">{restaurant ? "Update Restaurant" : "Add Restaurant"}</button>
+          </form>
         </div>
 
-        <button type="submit">Add Restaurant</button>
-      </form>
-    </div>
-   
 
-    </div>
+      </div>
     </>
   );
+}
+AddRestaurant.propTypes = {
+  restaurant: PropTypes.shape({
+    name: PropTypes.string,
+    address: PropTypes.string,
+    description: PropTypes.string,
+    $id: PropTypes.string,
+    image: PropTypes.string,
+  }),
 };
-
+// export default AddRestaurant;
 export default AddRestaurant;
