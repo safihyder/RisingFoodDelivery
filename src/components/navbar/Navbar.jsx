@@ -9,8 +9,10 @@ import AuthService from "../../appwrite/auth"
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import AppwriteResService from '../../appwrite/config';
+
 // import ShoppingCartIcon from "@material-ui/icons/ShoppingCart";
 const Navbar = () => {
+  const foodItems = useSelector(state => state.order.userorder)
   const [restaurant, setrestaurant] = useState(null)
   const userData = useSelector(state => state.auth.userData)
   useEffect(() => {
@@ -51,7 +53,7 @@ const Navbar = () => {
             {/* Add more links as needed */}
             <li className="cta-button">
               {/* <a href="#order-now">Cart <img src="/Images/cart.png" alt="" /></a>  */}
-              {authStatus && <button onClick={loadCart}>Cart &nbsp;    <Badge badgeContent={4} color='error'>
+              {authStatus && <button onClick={loadCart}>Cart &nbsp;    <Badge badgeContent={foodItems.length} color='error'>
                 <img src="/Images/cart.png" alt="" />
               </Badge> </button>}
               {cartView ? <Modal onClose={() => setCartView(false)}><Cart></Cart></Modal> : ""}

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -8,19 +8,15 @@ import { Card as AntCard } from 'antd';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { addOrder, updateOrder } from '../../store/orderSlice';
-// import {order} from '../../store/orderSlice'
 const Card = ({ item }) => {
-  const options = {
-    Half: 100,
-    Full: 200
+  const options={
+    
   }
-  const sizeOptions = Object.keys(options)
   const dispatch = useDispatch()
+  const userOrder = useSelector(state => state.order.userorder)
   const { Meta } = AntCard;
-  const [size, setSize] = React.useState('Half');
-  const [qty, setQty] = React.useState(1);
-  const foodData = useSelector(state => state.order.userorder)
-
+  const [size, setSize] = React.useState('');
+  const [qty, setQty] = React.useState('');
   const handleSizeChange = (e) => {
     setSize(e.target.value);
     console.log(e.target.value)
@@ -28,32 +24,27 @@ const Card = ({ item }) => {
   const handleQtyChange = (e) => {
     setQty(e.target.value);
   };
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     console.log('Add to cart')
     let food = []
-    for (const foodItem of foodData) {
-      console.log(foodItem)
-      console.log(item)
-      if (foodItem.id === item.$id) {
-        food = foodItem;
-
+    for (const fooditem of userOrder) {
+      if (fooditem.id === item.id) {
+        food.push({ ...item, qty: qty, size: size })
+        break;
       }
     }
     if (food) {
       if (food.size === size) {
-        // console.log(size)
-        // console.log(food.size)
-        dispatch(updateOrder({ id: item.$id, qty: qty, price: finalPrice }))
+        dispatch(updateOrder({ id: item.id, qty: qty, price: item.price }))
         return
       } else if (food.size !== size) {
-        dispatch(addOrder({ id: item.$id, name: item.name, size: size, qty: qty, price: finalPrice, img: item.image }))
+        dispatch(addOrder({ id: item.id, name: item.name, size: size, qty: qty, price: item.price, img: item.image }))
         return
       }
       return
     }
-    dispatch(addOrder({ id: item.$id, name: item.name, size: size, qty: qty, price: finalPrice, img: item.image }))
+    dispatch(addOrder({ id: item.id, name: item.name, size: size, qty: qty, price: item.price, img: item.image }))
   }
-  const finalPrice = options[size] * qty
   return (
     <AntCard
       className="shadow-card"
@@ -79,7 +70,7 @@ const Card = ({ item }) => {
             label="Category"
             placeholder='Select'
             onChange={handleQtyChange}
-            value={qty || 1}
+            value={qty}
           >
             <MenuItem value={1}>1</MenuItem>
             <MenuItem value={2}>2</MenuItem>
@@ -97,18 +88,16 @@ const Card = ({ item }) => {
             label="Category"
             placeholder='Select'
             onChange={handleSizeChange}
-            value={size || 'Half'}
+            value={size}
           >
-            <MenuItem value={"Half"} >Half</MenuItem>
-            <MenuItem value={"Full"}>Full</MenuItem>
+            <MenuItem value={"Full"} >Half</MenuItem>
+            <MenuItem value={"Half"}>Full</MenuItem>
           </Select>
         </FormControl>
-        <h2 className='font-bold flex items-center justify-center'>₹{finalPrice}/-</h2>
-        <ShoppingCartOutlined className='text-2xl cursor-pointer hover:text-red-300 hover:text-[1.7rem]' onClick=
-          {handleAddToCart} key="cart" />
+        <h2 className='font-bold flex items-center justify-center'>₹{item.price}</h2>
+        <ShoppingCartOutlined className='text-2xl cursor-pointer hover:text-red-300 hover:text-[1.7rem]' onClick={handleAddToCart} key="cart" />
       </div>
     </AntCard>
   )
 }
-
 export default Card

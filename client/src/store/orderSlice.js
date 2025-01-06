@@ -10,7 +10,7 @@ const orderSlice = createSlice({
     initialState,
     reducers: {
         addOrder: (state, action) => {
-            state.userorder = [...state.userorder, action.payload];
+            state.userorder = action.payload;
         },
         removeOrder: (state, action) => {
             state.userorder.splice(action.payload.index, 1);
