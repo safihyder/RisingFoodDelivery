@@ -1,4 +1,8 @@
+import React from 'react'
 import ReactDom from 'react-dom'
+import AuthService from "./appwrite/auth"
+import { useDispatch } from 'react-redux'
+import { login, logout } from './store/authSlice'
 const MODAL_STYLES = {
   position: 'fixed',
   top: '50%',
@@ -20,7 +24,19 @@ const OVERLAY_STYLES = {
   zIndex: 1000
 }
 export default function Modal({ children, onClose }) {
+  // const [loading, setLoading] = React.useState(true)
+  // const dispatch = useDispatch()
+  // React.useEffect(() => {
+  //   AuthService.getCurrentUser()
+  //     .then((userData) => {
+  //       if (userData) {
+  //         dispatch(login({ userData }))
+  //       } else {
+  //         dispatch(logout())
+  //       }
+  //     }).finally(() => setLoading(false))
 
+  // }, [])
   return ReactDom.createPortal(
     <>
       <div style={OVERLAY_STYLES} />

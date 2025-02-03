@@ -20,7 +20,8 @@ const Card = ({ item }) => {
   const [size, setSize] = React.useState('Half');
   const [qty, setQty] = React.useState(1);
   const foodData = useSelector(state => state.order.userorder)
-
+  let totalQty = qty;
+  totalQty += qty;
   const handleSizeChange = (e) => {
     setSize(e.target.value);
     console.log(e.target.value)
@@ -36,14 +37,13 @@ const Card = ({ item }) => {
       console.log(item)
       if (foodItem.id === item.$id) {
         food = foodItem;
-
       }
     }
     if (food) {
       if (food.size === size) {
         // console.log(size)
         // console.log(food.size)
-        dispatch(updateOrder({ id: item.$id, qty: qty, price: finalPrice }))
+        dispatch(updateOrder({ id: item.$id, qty: totalQty, price: finalPrice }))
         return
       } else if (food.size !== size) {
         dispatch(addOrder({ id: item.$id, name: item.name, size: size, qty: qty, price: finalPrice, img: item.image }))
@@ -54,6 +54,7 @@ const Card = ({ item }) => {
     dispatch(addOrder({ id: item.$id, name: item.name, size: size, qty: qty, price: finalPrice, img: item.image }))
   }
   const finalPrice = options[size] * qty
+
   return (
     <AntCard
       className="shadow-card"

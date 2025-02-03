@@ -45,8 +45,6 @@ const SignupUser = () => {
       }
     }
   }
-
-
   return (
     <>
       <div className="signup">

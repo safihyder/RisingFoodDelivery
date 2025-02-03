@@ -1,13 +1,49 @@
+import React from "react";
 import { useSelector } from "react-redux";
 import "./Cart.css"
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { removeOrder } from "../../store/orderSlice";
+import { removeOrder, dropOrders } from "../../store/orderSlice";
+import AppwriteOrderService from '../../appwrite/orderconfig'
+import { Query } from "appwrite";
 const Cart = () => {
   const dispatch = useDispatch();
-  const foodData = useSelector(state => state.order.userorder)
-  console.log(foodData)
+  const [dbData, setDbData] = React.useState([])
+  useEffect(() => {
+    AppwriteOrderService.getOrders([Query.equal("email", userEmail)]).then((data) => {
+      setDbData(data?.documents[0])
+      console.log(dbData?.orderdata)
+    })
+  }, [])
+  const foodData = useSelector(state => state.order.userorder);
+  const userEmail = useSelector(state => state.auth.userData.email)
+  let totalPrice = foodData.reduce((total, food) => total + food.price, 0);
+
+  // if (dbData) {
+  //   console.log(dbData)  
+  //   console.log('Order already exists')
+  // }
+  const handleCheckOut = async (e) => {
+    console.log('Check Out')
+    e.preventDefault();
+    if (dbData) {
+      const dborderdata = dbData?.orderdata
+      console.log('Order already exists')
+      const updatedData = await AppwriteOrderService.updateOrder(dbData?.$id, { orderdata: dborderdata, newdata: foodData })
+      if (updatedData) {
+        dispatch(dropOrders())
+        console.log('Order Updated')
+      }
+    }
+    else {
+      const dbOrder = await AppwriteOrderService.AddOrder({ email: userEmail, orderdata: foodData })
+      console.log(dbOrder);
+      if (dbOrder) {
+        dispatch(dropOrders())
+      }
+    }
+  }
   if (foodData.length === 0) {
     return (
       <div>
@@ -29,15 +65,6 @@ const Cart = () => {
               <th scope='col' >Delete</th>
             </tr>
           </thead>
-          {/* <tbody>
-            <tr>
-              <th scope='row' >1</th>
-              <td >Chicken Biryani</td>
-              <td>1</td>
-              <td>full</td>
-              <td>250</td>
-              <td ><button type="button"><DeleteIcon color='error' /></button> </td></tr>
-          </tbody> */}
           <tbody>
             {foodData && foodData.map((food, index) => (
               <tr key={index}>
@@ -46,15 +73,15 @@ const Cart = () => {
                 <td>{food.qty}</td>
                 <td>{food.size}</td>
                 <td>{food.price}</td>
-                <td ><button type="button"><DeleteIcon onClick={() => { dispatch(removeOrder(index)) }} color='error' /></button> </td>
+                <td><button type="button"><DeleteIcon onClick={() => { dispatch(removeOrder(index)) }} color='error' /></button> </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* <div><h1 className='fs-2 text-white'>Total Price: {totalPrice}/-</h1></div>
-    <div>
-      <button className='btn bg-success mt-5 ' onClick={handleCheckOut} > Check Out </button>
-    </div> */}
+        <div className="mt-5"><h1 className='text-2xl text-white'>Total Price: {totalPrice}/-</h1></div>
+        <div>
+          <button type="button" className='p-2 rounded-md hover:inset-1 hover:bg-green-500 mt-5 text-white bg-green-600' onClick={handleCheckOut}> Check Out </button>
+        </div>
       </div>
     </div>
   )
