@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { addOrder, updateOrder } from '../../store/orderSlice';
 // import {order} from '../../store/orderSlice'
-const Card = ({ item }) => {
+const Card = ({ item, image }) => {
   const options = {
     Half: 100,
     Full: 200
@@ -20,8 +20,7 @@ const Card = ({ item }) => {
   const [size, setSize] = React.useState('Half');
   const [qty, setQty] = React.useState(1);
   const foodData = useSelector(state => state.order.userorder)
-  let totalQty = qty;
-  totalQty += qty;
+
   const handleSizeChange = (e) => {
     setSize(e.target.value);
     console.log(e.target.value)
@@ -43,7 +42,7 @@ const Card = ({ item }) => {
       if (food.size === size) {
         // console.log(size)
         // console.log(food.size)
-        dispatch(updateOrder({ id: item.$id, qty: totalQty, price: finalPrice }))
+        dispatch(updateOrder({ id: item.$id, qty: qty, price: finalPrice }))
         return
       } else if (food.size !== size) {
         dispatch(addOrder({ id: item.$id, name: item.name, size: size, qty: qty, price: finalPrice, img: item.image }))
@@ -63,7 +62,7 @@ const Card = ({ item }) => {
         <img
           className="w-[250px] h-[250px]"
           alt="foodImg"
-          src={item.image}
+          src={image || item.image}
         />
       }
     >

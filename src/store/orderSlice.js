@@ -23,7 +23,7 @@ const orderSlice = createSlice({
             if (foodIndex !== -1) {
                 state.userorder[foodIndex] = {
                     ...state.userorder[foodIndex],
-                    qty: action.payload.qty,
+                    qty: action.payload.qty + state.userorder[foodIndex].qty,
                     price: action.payload.price + state.userorder[foodIndex].price
                 };
             }

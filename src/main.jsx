@@ -16,6 +16,7 @@ import Restaurant from './screens/Restaurant/Restaurant';
 import { createBrowserRouter } from 'react-router-dom'
 import EditRestaurant from './screens/EditRestaurant/EditRestaurant.jsx'
 import EditFoodItem from './screens/EditFoodItem/EditFoodItem.jsx'
+import Item from './screens/Item/Item.jsx'
 
 const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
       {
         path: '/restaurant/edit/:slug',
         element: <EditRestaurant />
+      },
+      {
+        path: '/item/:slug',
+        element: <Item />
       },
       {
         path: '/item/edit/:slug',
