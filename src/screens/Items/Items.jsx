@@ -1,4 +1,4 @@
-import Card from "../../components/card/Card"
+import Card from "../../components/Card/Card"
 import "./Items.css"
 const Items = ({ items }) => {
     return (

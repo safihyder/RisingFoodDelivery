@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom'
-import Card from '../../components/card/Card';
+import Card from '../../components/Card/Card';
 import AppwriteitemService from '../../appwrite/itemsconfig'
 import AppwriteResService from '../../appwrite/config'
 import { useSelector } from 'react-redux';
