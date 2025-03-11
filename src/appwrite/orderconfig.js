@@ -39,7 +39,7 @@ export class Service {
                 }
             )
         } catch (error) {
-            c
+
             console.log("Appwrite serive :: updateDetail :: error", error);
         }
     }

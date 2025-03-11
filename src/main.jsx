@@ -17,6 +17,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import EditRestaurant from './screens/EditRestaurant/EditRestaurant.jsx'
 import EditFoodItem from './screens/EditFoodItem/EditFoodItem.jsx'
 import Item from './screens/Item/Item.jsx'
+import Success from './screens/Payment/Success.jsx'
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: '/item/edit/:slug',
         element: <EditFoodItem />
+      },
+      {
+        path: '/payment-success',
+        element: <Success />
       },
     ],
   },

@@ -5,6 +5,7 @@ import Card from '../../components/card/Card';
 import AppwriteitemService from '../../appwrite/itemsconfig'
 import AppwriteResService from '../../appwrite/config'
 import { useSelector } from 'react-redux';
+import Loading from '../../components/Loading';
 const Item = () => {
     const navigate = useNavigate();
     const { slug } = useParams();
@@ -15,29 +16,6 @@ const Item = () => {
     const [resimg, setresImg] = React.useState([])
     console.log(ItemData)
     useEffect(() => {
-        // async function fetchData() {
-        //     if (slug) {
-        //         await AppwriteitemService.getItem(slug).then((data) => {
-        //             if (data) {
-        //                 console.log(data.image)
-        //                 setItem(data)
-        //                 setImg(AppwriteitemService.getFilePreview(data.image))
-        //             } else {
-        //                 navigate('/')
-        //             }
-        //         })
-        //     } else {
-        //         navigate('/')
-        //     }
-        //     await AppwriteResService.getRestaurant(Item.resid).then((data) => {
-        //         if (data) {
-        //             setRestaurant(data)
-        //             console.log(data)
-        //             setresImg(AppwriteResService.getFilePreview(data.image))
-        //         }
-        //     })
-        // }
-        // fetchData()
         if (slug) {
             let filterData = ItemData?.filter((item) => {
                 return item.$id === slug
@@ -58,13 +36,21 @@ const Item = () => {
     }
         , [Item.resid, navigate, slug])
     return (
-        <div className="flex justify-center">
-            <div className={`w-[95%] mx-auto h-[90vh] rounded-md flex items-center justify-evenly`} style={{ backgroundImage: `url(${resimg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                <div>
+        <div className="flex justify-center p-4">
+            <div className={`w-full md:w-[95%] mx-auto min-h-[90vh] rounded-md flex flex-col md:flex-row items-center justify-evenly gap-8 p-4 md:p-8`}
+                style={{
+                    backgroundImage: `url(${resimg})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed'
+                }}>
+                <div className="w-full md:w-auto">
                     <Card item={Item} image={img} />
                 </div>
-                <div>
-                    <h1 className={`text-3xl bg-slate-300 rounded-md p-2`}>{Restaurant.name}</h1>
+                <div className="w-full md:w-auto text-center">
+                    <h1 className={`text-xl md:text-3xl bg-slate-300 bg-opacity-90 rounded-md p-2 break-words`}>
+                        {Restaurant.name}
+                    </h1>
                 </div>
             </div>
         </div>

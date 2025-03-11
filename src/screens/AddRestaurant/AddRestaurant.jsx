@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import AppwriteResService from '../../appwrite/config'
 import { useNavigate } from 'react-router-dom';
 import { restaurants } from '../../store/restSlice';
+import axios from 'axios';
 const AddRestaurant = ({ restaurant }) => {
   const dispatch = useDispatch()
   const userData = useSelector(state => state.auth.userData)
@@ -41,6 +42,51 @@ const AddRestaurant = ({ restaurant }) => {
         navigate(`/restaurant/${restaurant.$id}`)
       }
     } else {
+      //Creation of order
+      const response = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/create_order', {
+        amount: '2000',
+        currency: 'INR',
+        receipt: 'receipt#1',
+        notes: {},
+      })
+      const order = await response.json();
+      const options = {
+        key: 'rzp_test_SKvWaxTYYZYvIC', // Replace with your Razorpay key_id
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Your Company Name',
+        description: 'Test Transaction',
+        order_id: order.id, // This is the order_id created in the backend
+        callback_url: 'http://localhost:5173/payment-success', // Your success URL
+        prefill: {
+          name: 'Safi Hyder',
+          email: 'safihaider0987@gmail.com',
+          contact: '+91-7889365127'
+        },
+        theme: {
+          color: '#F37254'
+        },
+        handler: function (response) {
+          axios.post('https://67b5a11ac39fc1a21470.appwrite.global/verify-payment', {
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature
+          }).then(res => res.json())
+            .then(data => {
+              if (data.status === 'ok') {
+                alert('Payment verified successfully');
+
+              } else {
+                alert('Payment verification failed');
+              }
+            }).catch(error => {
+              console.error('Error:', error);
+              alert('Error verifying payment');
+            });
+        }
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
       const file = await AppwriteResService.uploadFile(img)
       if (file) {
         const fileId = file.$id
@@ -55,7 +101,6 @@ const AddRestaurant = ({ restaurant }) => {
       }
     }
   }
-
   return (
     <>
       <div className="addrestaurant">

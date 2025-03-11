@@ -35,11 +35,13 @@ const Home = () => {
 
   console.log(restaurants)
   return (
-    <div>
+    <div className="mt-2 sm:mt-3 md:mt-4">
       <Carousele />
       <MultiCarousel url={'/item'} items={items} title="Top Items" />
       <MultiCarousel url={'/restaurant'} title="Top Restaurants" items={restaurants} />
-      <div className='pngDelivery' style={{ height: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><img src={image} style={{ width: '100%', height: '500px' }} alt="" /></div>
+      <div className="flex items-center justify-center">
+        <img src={image} className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-contain" alt="Delivery illustration" />
+      </div>
     </div>
   )
 }

@@ -13,6 +13,7 @@ import Fotor from './components/Fotor/Fotor';
 import Navbar from './components/navbar/Navbar';
 import { restaurants } from './store/restSlice';
 import { item } from './store/itemSlice';
+import Loading from './components/Loading';
 // import RadarMap from './components/Radar/RadarMap';
 function App() {
   const [loading, setLoading] = useState(true)
@@ -51,7 +52,7 @@ function App() {
       <Fotor />
     </>
   )
-    : null
+    : <Loading />
 }
 
 export default App
