@@ -46,7 +46,7 @@ const Restaurant = () => {
     console.log(resData)
 
     return resData ? (
-        <div className='px-4 sm:px-6 md:px-8 lg:px-12 my-4 sm:my-5 flex flex-col gap-4 sm:gap-5 w-[100vw]'>
+        <div className='px-4 sm:px-6 md:px-8 lg:px-12 my-4 sm:my-5 flex flex-col gap-4 sm:gap-5'>
             <div className='h-[50vh] sm:h-[60vh] md:h-[70vh] lg:h-[80vh] bg-slate-500 rounded-md relative'>
                 <img className="w-full h-full object-cover rounded-[inherit]" src={AppwriteResService.getFilePreview(resData.image)} alt={resData.name} />
                 {isManager &&
