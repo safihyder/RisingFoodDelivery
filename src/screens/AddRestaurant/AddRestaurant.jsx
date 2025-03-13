@@ -44,12 +44,13 @@ const AddRestaurant = ({ restaurant }) => {
     } else {
       //Creation of order
       const response = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/create_order', {
-        amount: '2000',
+        amount: 2000,
         currency: 'INR',
         receipt: 'receipt#1',
         notes: {},
       })
-      const order = await response.json();
+      const order = await response.data;
+      console.log(order)
       const options = {
         key: 'rzp_test_SKvWaxTYYZYvIC', // Replace with your Razorpay key_id
         amount: order.amount,
@@ -57,7 +58,7 @@ const AddRestaurant = ({ restaurant }) => {
         name: 'Your Company Name',
         description: 'Test Transaction',
         order_id: order.id, // This is the order_id created in the backend
-        callback_url: 'http://localhost:5173/payment-success', // Your success URL
+        callback_url: 'http://localhost:5174/payment-success', // Your success URL
         prefill: {
           name: 'Safi Hyder',
           email: 'safihaider0987@gmail.com',
@@ -66,39 +67,45 @@ const AddRestaurant = ({ restaurant }) => {
         theme: {
           color: '#F37254'
         },
-        handler: function (response) {
-          axios.post('https://67b5a11ac39fc1a21470.appwrite.global/verify-payment', {
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature
-          }).then(res => res.json())
-            .then(data => {
-              if (data.status === 'ok') {
-                alert('Payment verified successfully');
-
-              } else {
-                alert('Payment verification failed');
-              }
-            }).catch(error => {
-              console.error('Error:', error);
-              alert('Error verifying payment');
+        handler: async function (response) {
+          try {
+            const verificationResult = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/verify-payment', {
+              razorpay_order_id: order.id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
             });
+
+            if (verificationResult.data.status === 'success') {
+              alert('Payment verified successfully');
+              // Only proceed with restaurant creation after successful payment
+              try {
+                const file = await AppwriteResService.uploadFile(img);
+                if (file) {
+                  const fileId = file.$id;
+                  formData.image = fileId;
+                }
+                const session = await AppwriteResService.AddRestaurant({ ...formData, userId: userData.$id });
+                console.log('Restaurant creation session:', session);
+                const dbPost = await AppwriteResService.getRestaurant(session.$id);
+                if (dbPost) {
+                  dispatch(restaurants({ restaurant: dbPost }));
+                  navigate(`/restaurant/${dbPost.$id}`);
+                }
+              } catch (error) {
+                console.error('Error creating restaurant:', error);
+                alert('Payment was successful but there was an error creating your restaurant. Please contact support.');
+              }
+            } else {
+              alert('Payment verification failed. Please try again.');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error.response?.data || error.message);
+            alert('Error verifying payment. Please try again or contact support.');
+          }
         }
       };
       const rzp = new window.Razorpay(options);
       rzp.open();
-      const file = await AppwriteResService.uploadFile(img)
-      if (file) {
-        const fileId = file.$id
-        formData.image = fileId
-      }
-      const session = await AppwriteResService.AddRestaurant({ ...formData, userId: userData.$id })
-      console.log(session)
-      const dbPost = await AppwriteResService.getRestaurant(session.$id)
-      if (dbPost) {
-        dispatch(restaurants({ restaurant: dbPost }))
-        navigate(`/restaurant/${dbPost.$id}`)
-      }
     }
   }
   return (
