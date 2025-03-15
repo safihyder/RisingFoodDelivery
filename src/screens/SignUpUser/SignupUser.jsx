@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Signup.css';
 import { Link } from 'react-router-dom';
 import Fotor from '../../components/Fotor/Fotor';
@@ -17,39 +17,88 @@ const SignupUser = () => {
     password: '',
     cpassword: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
+
+  // Clear messages after 5 seconds
+  useEffect(() => {
+    if (formError || formSuccess) {
+      const timer = setTimeout(() => {
+        setFormError('');
+        setFormSuccess('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [formError, formSuccess]);
+
   const handleSubmit = async (e) => {
     const { name, email, password, cpassword } = formData;
     e.preventDefault();
+
+    // Reset messages
+    setFormError('');
+    setFormSuccess('');
+
     if (name === "") {
-      alert("Enter your name");
+      setFormError("Enter your name");
+      return;
     } else if (email === "") {
-      alert("Enter your email");
+      setFormError("Enter your email");
+      return;
     } else if (password === '') {
-      alert("Enter your password");
+      setFormError("Enter your password");
+      return;
     } else if (cpassword === "") {
-      alert("Confirm you password");
+      setFormError("Confirm your password");
+      return;
     } else if (password.length < 6) {
-      alert("Password must be atleast 6 character")
+      setFormError("Password must be at least 6 characters");
+      return;
     } else if (cpassword.length < 6) {
-      alert("Password must be atleast 6 character")
-    } else {
+      setFormError("Password must be at least 6 characters");
+      return;
+    } else if (password !== cpassword) {
+      setFormError("Passwords do not match");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormSuccess('Creating your account...');
+
+    try {
       const userData = await AuthService.createAccount(name, email, password);
       if (userData) {
-        const userData = await AuthService.getCurrentUser()
-        console.log(userData);
-        if (userData) dispatch(login({ userData }));
-        navigate("/");
+        setFormSuccess('Account created successfully!');
+        const currentUser = await AuthService.getCurrentUser();
+        console.log(currentUser);
+        if (currentUser) dispatch(login({ userData: currentUser }));
+
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       }
+    } catch (error) {
+      console.error('Signup error:', error);
+      setFormError(error.message || 'Failed to create account. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   }
+
   return (
     <>
       <div className="signup">
         <div className="signup-container">
           <h2><img src="/Images/logo.png" alt="" />Signup for Rising</h2>
+
+          {formError && <div className="form-message error">{formError}</div>}
+          {formSuccess && <div className="form-message success">{formSuccess}</div>}
+
           <form onSubmit={handleSubmit}>
             <div className="input-group">
               <label htmlFor="name">Full Name</label>
@@ -95,7 +144,18 @@ const SignupUser = () => {
                 required
               />
             </div>
-            <button type="submit">Sign Up</button>
+            <button
+              type="submit"
+              className={isSubmitting ? 'submitting' : ''}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="spinner"></span>
+                  <span className="sr-only">Signing up...</span>
+                </>
+              ) : 'Sign Up'}
+            </button>
           </form>
           <p className="login-link">Already have an account? <Link to="/loginuser">Login</Link></p>
         </div>

@@ -11,7 +11,7 @@ export class Service {
         this.databases = new Databases(this.client);
         this.bucket = new Storage(this.client)
     }
-    async AddRestaurant({ name, address, image, description, userId }) {
+    async AddRestaurant({ name, address, image, description, userId, subscriptionPlan, billingCycle }) {
         try {
             return await this.databases.createDocument(
                 conf.appwriteDatabaseId,
@@ -23,6 +23,8 @@ export class Service {
                     image,
                     description,
                     userId,
+                    subscriptionPlan,
+                    billingCycle
                 }
             )
         } catch (error) {

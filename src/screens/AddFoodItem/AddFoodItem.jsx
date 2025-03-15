@@ -9,6 +9,10 @@ import { Query } from 'appwrite';
 const AddFoodItem = ({ foodItem }) => {
   const userData = useSelector(state => state.auth.userData)
   const [restaurant, setrestaurant] = useState([])
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [formSuccess, setFormSuccess] = useState('');
+
   useEffect(() => {
     AppwriteResService.getRestaurants([Query.contains('userId', userData.$id)])
       .then((data) => {
@@ -17,6 +21,7 @@ const AddFoodItem = ({ foodItem }) => {
         }
       })
   }, [userData])
+
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: foodItem?.name || '',
@@ -29,6 +34,17 @@ const AddFoodItem = ({ foodItem }) => {
     // ... other relevant fields (e.g., dietary restrictions, ingredients)
   });
 
+  // Clear messages after 5 seconds
+  useEffect(() => {
+    if (formError || formSuccess) {
+      const timer = setTimeout(() => {
+        setFormError('');
+        setFormSuccess('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [formError, formSuccess]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'image') {
@@ -37,31 +53,67 @@ const AddFoodItem = ({ foodItem }) => {
       setFormData({ ...formData, [name]: value });
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData)
-    if (foodItem) {
-      const file = formData.image ? await AppwriteItemService.uploadFile(formData.image) : null
-      if (file) {
-        AppwriteItemService.deleteFile(foodItem.image)
-      }
-      const dbItem = await AppwriteItemService.updateDetail(foodItem.$id, {
-        ...formData,
-        image: file ? file.$id : undefined
-      })
-      if (dbItem) {
-        navigate(`/`)
-      }
+
+    // Reset messages
+    setFormError('');
+    setFormSuccess('');
+
+    // Validate form
+    if (!formData.name || !formData.description || !formData.price || !formData.category) {
+      setFormError('Please fill in all required fields');
+      return;
     }
-    const file = await AppwriteItemService.uploadFile(formData.image);
-    if (file) {
-      const fileId = file.$id;
-      formData.image = fileId;
+
+    if (!formData.image && !foodItem) {
+      setFormError('Please upload an image for the food item');
+      return;
     }
-    const dbPost = await AppwriteItemService.addItem({ ...formData, resid: restaurant.$id })
-    console.log(dbPost)
-    if (dbPost) {
-      navigate(`/restaurant/${restaurant.$id}`)
+
+    setIsSubmitting(true);
+
+    try {
+      console.log(formData);
+
+      if (foodItem) {
+        setFormSuccess('Updating food item...');
+        const file = formData.image ? await AppwriteItemService.uploadFile(formData.image) : null
+        if (file) {
+          AppwriteItemService.deleteFile(foodItem.image)
+        }
+        const dbItem = await AppwriteItemService.updateDetail(foodItem.$id, {
+          ...formData,
+          image: file ? file.$id : undefined
+        })
+        if (dbItem) {
+          setFormSuccess('Food item updated successfully!');
+          setTimeout(() => {
+            navigate(`/`);
+          }, 1500);
+        }
+      } else {
+        setFormSuccess('Adding new food item...');
+        const file = await AppwriteItemService.uploadFile(formData.image);
+        if (file) {
+          const fileId = file.$id;
+          formData.image = fileId;
+        }
+        const dbPost = await AppwriteItemService.addItem({ ...formData, resid: restaurant.$id })
+        console.log(dbPost);
+        if (dbPost) {
+          setFormSuccess('Food item added successfully!');
+          setTimeout(() => {
+            navigate(`/restaurant/${restaurant.$id}`);
+          }, 1500);
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setFormError(error.message || 'An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -69,7 +121,11 @@ const AddFoodItem = ({ foodItem }) => {
     <>
       <div className="addFoodItem">
         <div className="add-food-item-container">
-          <h2>Add a New Food Item</h2>
+          <h2>{foodItem ? 'Update Food Item' : 'Add a New Food Item'}</h2>
+
+          {formError && <div className="form-message error">{formError}</div>}
+          {formSuccess && <div className="form-message success">{formSuccess}</div>}
+
           <form onSubmit={handleSubmit} encType="multipart/form-data">
             <div className="input-group">
               <label htmlFor="name">Item Name</label>
@@ -105,12 +161,23 @@ const AddFoodItem = ({ foodItem }) => {
             {/* Image Upload */}
             <div className="input-group">
               <label htmlFor="image">Item Image</label>
-              <input type="file" id="image" name="image" onChange={handleChange} required />
+              <input type="file" id="image" name="image" onChange={handleChange} required={!foodItem} />
             </div>
 
             {/* ... (other input fields for dietary restrictions, ingredients, etc.) */}
 
-            <button type="submit">Add Item</button>
+            <button
+              type="submit"
+              className={isSubmitting ? 'submitting' : ''}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="spinner"></span>
+                  <span className="sr-only">{foodItem ? 'Updating...' : 'Adding...'}</span>
+                </>
+              ) : (foodItem ? 'Update Item' : 'Add Item')}
+            </button>
           </form>
         </div>
       </div>
