@@ -14,10 +14,13 @@ import Navbar from './components/navbar/Navbar';
 import { restaurants } from './store/restSlice';
 import { item } from './store/itemSlice';
 import Loading from './components/Loading';
+// import ScrollToTop from './components/ScrollToTop';
 // import RadarMap from './components/Radar/RadarMap';
+
 function App() {
   const [loading, setLoading] = useState(true)
   const dispatch = useDispatch()
+
   useEffect(() => {
     AuthService.getCurrentUser()
       .then((userData) => {
@@ -44,8 +47,10 @@ function App() {
         }
       })
   }, [])
+
   return !loading ? (
     <>
+     
       <Navbar />
       <Outlet />
       {/* <RadarMap /> */}
@@ -54,5 +59,4 @@ function App() {
   )
     : <Loading />
 }
-
 export default App

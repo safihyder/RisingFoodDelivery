@@ -22,6 +22,7 @@
     "appwrite": "^16.0.2",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "framer-motion": "^12.5.0",
     "maplibre-gl": "^4.7.1",
     "prop-types": "^15.8.1",
     "radar-sdk-js": "^4.4.7",

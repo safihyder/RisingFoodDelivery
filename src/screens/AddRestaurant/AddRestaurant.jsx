@@ -258,7 +258,6 @@ const AddRestaurant = ({ restaurant }) => {
     </>
   );
 }
-
 AddRestaurant.propTypes = {
   restaurant: PropTypes.shape({
     name: PropTypes.string,

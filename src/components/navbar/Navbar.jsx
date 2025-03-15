@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import "./Navbar.css";
 import { Query } from 'appwrite';
 import { Link } from 'react-router-dom';
 import Modal from '../../Modal';
@@ -34,65 +33,199 @@ const Navbar = () => {
     dispatch(logout())
   }
   return (
-    <div className="sticky top-0 z-50">
-      <nav className="navbar backdrop-blur-md bg-white/30 shadow-lg">
+    <div className="fixed top-0 left-0 right-0 z-50">
+      <nav className="flex justify-between items-center px-2 py-1 sm:px-4 sm:py-2 md:px-8 backdrop-blur-md bg-white/20 border-b border-white/10 shadow-lg">
         <Link to="/" className="transition-transform hover:scale-105">
-          <div className="logo">
-            <img src="/Images/logo.png" alt="Food Delivery Logo" className="h-12 w-auto" />
+          <div className="ml-0 sm:ml-2 md:ml-4">
+            <img src="/Images/logo.png" alt="Food Delivery Logo" className="h-10 sm:h-12 w-auto" />
           </div>
         </Link>
-        <div>
-          <ul className={`nav-links ${isOpen ? 'open' : ''} font-medium text-gray-800`}>
-            {restaurant ? 
-              <li className="hover:text-orange-500 transition-colors">
-                <Link to={`/restaurant/${restaurant?.$id}`}>Your Restaurant</Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:block">
+          <ul className="flex items-center space-x-8 font-medium text-gray-800">
+            {restaurant ? (
+              <li>
+                <Link
+                  to={`/restaurant/${restaurant?.$id}`}
+                  className="hover:text-orange-500 transition-colors"
+                >
+                  Your Restaurant
+                </Link>
               </li>
-              :
-              <li className="hover:text-orange-500 transition-colors">
-                <Link to={`${authStatus ? "/addrestaurant" : "/loginuser"}`}>Add a Restaurant</Link>
+            ) : (
+              <li>
+                <Link
+                  to={`${authStatus ? "/addrestaurant" : "/loginuser"}`}
+                  className="hover:text-orange-500 transition-colors"
+                >
+                  Add a Restaurant
+                </Link>
               </li>
-            }
-            {!authStatus && 
-              <li className="hover:text-orange-500 transition-colors">
-                <Link to="/loginuser">Login</Link>
+            )}
+
+            {!authStatus && (
+              <>
+                <li>
+                  <Link
+                    to="/loginuser"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/signupuser"
+                    className="hover:text-orange-500 transition-colors"
+                  >
+                    Signup
+                  </Link>
+                </li>
+              </>
+            )}
+
+            {authStatus && (
+              <li>
+                <button
+                  onClick={logoutHandler}
+                  className="hover:text-orange-500 transition-colors font-medium"
+                >
+                  Logout
+                </button>
               </li>
-            }
-            {!authStatus && 
-              <li className="hover:text-orange-500 transition-colors">
-                <Link to="/signupuser">Signup</Link>
-              </li>
-            }
-            {authStatus && 
-              <li className="hover:text-orange-500 transition-colors cursor-pointer" onClick={logoutHandler}>
-                Logout
-              </li>
-            }
-            <li className="cta-button">
-              {authStatus && 
-                <button 
+            )}
+
+            <li>
+              {authStatus && (
+                <button
                   onClick={loadCart}
-                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-full transition-colors"
+                  className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white px-4 py-2 rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   Cart
                   <Badge badgeContent={foodItems.length} color='error'>
                     <img src="/Images/cart.png" alt="" className="h-6 w-6" />
                   </Badge>
                 </button>
-              }
+              )}
               {cartView ? <Modal onClose={() => setCartView(false)}><Cart></Cart></Modal> : ""}
             </li>
           </ul>
         </div>
-        <div 
-          className={`burger ${isOpen ? 'open' : ''} z-50`} 
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <div className="line1 bg-gray-800"></div>
-          <div className="line2 bg-gray-800"></div>
-          <div className="line3 bg-gray-800"></div>
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden">
+          {/* Burger Menu Button */}
+          <button
+            className="relative z-50 flex flex-col justify-center items-center w-8 h-8 sm:w-10 sm:h-10"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <span
+              className={`block h-0.5 w-5 sm:w-6 bg-gray-800 transition-all duration-300 ease-in-out ${isOpen ? 'rotate-45 translate-y-1.5' : '-translate-y-1'}`}
+            ></span>
+            <span
+              className={`block h-0.5 w-5 sm:w-6 bg-gray-800 transition-all duration-300 ease-in-out my-0.5 ${isOpen ? 'opacity-0' : 'opacity-100'}`}
+            ></span>
+            <span
+              className={`block h-0.5 w-5 sm:w-6 bg-gray-800 transition-all duration-300 ease-in-out ${isOpen ? '-rotate-45 -translate-y-1.5' : 'translate-y-1'}`}
+            ></span>
+          </button>
+
+          {/* Mobile Menu */}
+          <div
+            className={`fixed inset-0 z-40 transition-all duration-300 ease-in-out ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
+            onClick={() => setIsOpen(false)}
+          >
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}></div>
+            <div
+              className={`absolute right-0 top-0 h-screen w-64 bg-gradient-to-b from-red-600/90 to-orange-500/90 backdrop-blur-md shadow-xl transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col p-6 pt-20">
+                <ul className="flex flex-col space-y-6 font-medium text-white">
+                  {restaurant ? (
+                    <li>
+                      <Link
+                        to={`/restaurant/${restaurant?.$id}`}
+                        className="block py-2 hover:text-yellow-300 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Your Restaurant
+                      </Link>
+                    </li>
+                  ) : (
+                    <li>
+                      <Link
+                        to={`${authStatus ? "/addrestaurant" : "/loginuser"}`}
+                        className="block py-2 hover:text-yellow-300 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Add a Restaurant
+                      </Link>
+                    </li>
+                  )}
+
+                  {!authStatus && (
+                    <>
+                      <li>
+                        <Link
+                          to="/loginuser"
+                          className="block py-2 hover:text-yellow-300 transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Login
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          to="/signupuser"
+                          className="block py-2 hover:text-yellow-300 transition-colors"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Signup
+                        </Link>
+                      </li>
+                    </>
+                  )}
+
+                  {authStatus && (
+                    <li>
+                      <button
+                        onClick={() => {
+                          logoutHandler();
+                          setIsOpen(false);
+                        }}
+                        className="block py-2 hover:text-yellow-300 transition-colors font-medium text-left w-full"
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  )}
+
+                  {authStatus && (
+                    <li className="mt-4">
+                      <button
+                        onClick={() => {
+                          loadCart();
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center gap-2 bg-white text-red-600 px-4 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg w-full justify-center"
+                      >
+                        Cart
+                        <Badge badgeContent={foodItems.length} color='error'>
+                          <img src="/Images/cart.png" alt="" className="h-6 w-6" />
+                        </Badge>
+                      </button>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </nav>
     </div>
   )
 }
-export default Navbar
+
+export default Navbar;
