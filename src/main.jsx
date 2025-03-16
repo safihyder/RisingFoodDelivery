@@ -108,7 +108,7 @@ const router = createBrowserRouter([
         element: <ContactUs />
       },
       {
-        path: '/termsofservice',
+        path: '/terms-of-service',
         element: <TermsOfService />
       },
       {
