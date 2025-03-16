@@ -100,7 +100,7 @@ const router = createBrowserRouter([
         element: <AboutUs />
       },
       {
-        path: '/faq',
+        path: '/faqs',
         element: <FAQ />
       },
       {
