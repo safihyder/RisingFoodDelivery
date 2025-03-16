@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import './Restaurant.css'
 import FormControl from '@mui/material/FormControl'
 import MenuItem from '@mui/material/MenuItem';
 import AppwriteResService from '../../appwrite/config'
