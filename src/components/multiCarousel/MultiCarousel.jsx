@@ -108,7 +108,7 @@ const MultiCarousel = ({ title, items, url }) => {
           responsive={responsive}
           swipeable={true}
           draggable={true}
-          showDots={true}
+          // showDots={true}
           infinite={true}
           autoPlay={true}
           autoPlaySpeed={3000}

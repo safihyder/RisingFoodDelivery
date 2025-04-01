@@ -6,16 +6,18 @@ import AppwriteResService from '../../appwrite/config'
 import AppwriteItemService from '../../appwrite/itemsconfig'
 import Select from '@mui/material/Select';
 import { InputLabel } from '@mui/material';
-import Items from '../Items/Items';
 import { useSelector } from 'react-redux';
 import { Query } from 'appwrite';
 import Loading from '../../components/Loading';
 import { motion, AnimatePresence } from 'framer-motion';
+import Card from '../../components/Card/Card';
 
 const Restaurant = () => {
     const [resData, setResData] = useState(null)
     const [items, setItems] = useState([])
     const [category, setCategory] = useState('')
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filteredItems, setFilteredItems] = useState([]);
     const [isImageLoaded, setIsImageLoaded] = useState(false)
     const [activeTab, setActiveTab] = useState('menu')
     const [showFullDescription, setShowFullDescription] = useState(false)
@@ -23,10 +25,11 @@ const Restaurant = () => {
     const navigate = useNavigate()
     const userData = useSelector(state => state.auth.userData)
     const isManager = resData && userData ? resData.userId === userData.$id : false;
+
     const handleChange = (e) => {
         setCategory(e.target.value)
     }
-    console.log(category)
+
     useEffect(() => {
         if (slug) {
             AppwriteResService.getRestaurant(slug).then((data) => {
@@ -39,14 +42,32 @@ const Restaurant = () => {
         }
         AppwriteItemService.getItems([Query.contains('resid', slug), category ? Query.equal('category', category) : Query.contains('category', category)])
             .then((data) => {
-                data?.documents.map((item) => {
-                    item.image = AppwriteItemService.getFilePreview(item.image)
+                if (data?.documents) {
+                    const processedItems = data.documents.map((item) => ({
+                        ...item,
+                        image: AppwriteItemService.getFilePreview(item.image)
+                    }));
+                    setItems(processedItems);
+                    setFilteredItems(processedItems);
                 }
-                )
-                setItems(data.documents)
             })
     }, [slug, navigate, category])
-    console.log(resData)
+
+    useEffect(() => {
+        if (!items) return;
+
+        let filtered = [...items];
+
+        // Apply search filter
+        if (searchQuery.trim()) {
+            filtered = filtered.filter(item =>
+                item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                item.description.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        setFilteredItems(filtered);
+    }, [searchQuery, items]);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -213,25 +234,82 @@ const Restaurant = () => {
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                <div className='flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6'>
-                                    <h1 className='text-center text-2xl sm:text-3xl md:text-4xl text-orange-400 font-bold'>Menu</h1>
-                                    <FormControl size="small" className='min-w-[120px] sm:min-w-[150px]'>
-                                        <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                                        <Select
-                                            labelId="demo-simple-select-label"
-                                            id="demo-simple-select"
-                                            label="Category"
-                                            placeholder='Select'
-                                            onChange={handleChange}
-                                            value={category}
+                                <div className="max-w-4xl mx-auto mb-8 px-4">
+                                    <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6">
+                                        <h1 className='text-center text-2xl sm:text-3xl md:text-4xl text-orange-400 font-bold'>Menu</h1>
+                                        <FormControl size="small" className='min-w-[120px] sm:min-w-[150px]'>
+                                            <InputLabel id="demo-simple-select-label">Category</InputLabel>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                label="Category"
+                                                placeholder='Select'
+                                                onChange={handleChange}
+                                                value={category}
+                                            >
+                                                <MenuItem value={''}>All</MenuItem>
+                                                <MenuItem value={'vegetarian'}>Vegetarian</MenuItem>
+                                                <MenuItem value={'nonVegetarian'}>Non Vegetarian</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+
+                                    {/* Search Bar */}
+                                    <div className="relative flex-1 w-full max-w-md mx-auto mb-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Search food items..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        />
+                                        <svg
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            <MenuItem value={''}>All</MenuItem>
-                                            <MenuItem value={'vegetarian'}>Vegetarian</MenuItem>
-                                            <MenuItem value={'nonVegetarian'}>Non Vegetarian</MenuItem>
-                                        </Select>
-                                    </FormControl>
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                    </div>
+
+                                    {/* Results Count */}
+                                    <p className="text-sm text-gray-500 text-center mb-4">
+                                        {filteredItems.length} items found
+                                    </p>
                                 </div>
-                                <Items items={items} />
+
+                                {/* Items Grid */}
+                                <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 justify-items-center">
+                                    {filteredItems.length > 0 ? (
+                                        filteredItems.map((item, index) => (
+                                            <Card key={index} item={item} />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full text-center py-12">
+                                            <svg
+                                                className="mx-auto h-12 w-12 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                            <h3 className="mt-2 text-lg font-medium text-gray-900">No items found</h3>
+                                            <p className="mt-1 text-gray-500">Try adjusting your search or filters</p>
+                                        </div>
+                                    )}
+                                </div>
                             </motion.div>
                         )}
 

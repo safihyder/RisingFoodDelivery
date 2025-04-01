@@ -3,23 +3,25 @@ import { Query } from 'appwrite';
 import './App.css'
 import {
   Outlet,
+  useLocation,
 } from "react-router-dom";
 import AuthService from "./appwrite/auth"
 import AppwriteResService from './appwrite/config';
 import AppwriteItemService from './appwrite/itemsconfig'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login, logout } from './store/authSlice'
 import Fotor from './components/Fotor/Fotor';
 import Navbar from './components/navbar/Navbar';
 import { restaurants } from './store/restSlice';
 import { item } from './store/itemSlice';
 import Loading from './components/Loading';
-// import ScrollToTop from './components/ScrollToTop';
-// import RadarMap from './components/Radar/RadarMap';
+import Items from './screens/Items/Items';
 
 function App() {
   const [loading, setLoading] = useState(true)
   const dispatch = useDispatch()
+  const location = useLocation()
+  const items = useSelector((state) => state.item.items)
 
   useEffect(() => {
     AuthService.getCurrentUser()
@@ -48,15 +50,21 @@ function App() {
       })
   }, [])
 
+  const renderContent = () => {
+    if (location.pathname === '/items') {
+      return <Items items={items} />
+    }
+    return <Outlet />
+  }
+
   return !loading ? (
     <>
-     
       <Navbar />
-      <Outlet />
-      {/* <RadarMap /> */}
+      {renderContent()}
       <Fotor />
     </>
   )
     : <Loading />
 }
+
 export default App

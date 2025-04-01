@@ -22,6 +22,9 @@ import TermsOfService from './screens/TermsOfService/TermsOfService.jsx'
 import AboutUs from './screens/AboutUs/AboutUs.jsx'
 import FAQ from './screens/FAQ/FAQ.jsx'
 import ContactUs from './screens/ContactUs/ContactUs.jsx'
+import RestaurantsList from './screens/RestaurantsList/RestaurantsList.jsx'
+import Items from './screens/Items/Items.jsx'
+import Cookies from './screens/Cookies/Cookies.jsx'
 
 const router = createBrowserRouter([
   {
@@ -36,6 +39,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
+      },
+      {
+        path: "/items",
+        element: <Items />,
       },
       {
         path: "/loginuser",
@@ -62,10 +69,14 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/restaurant/:slug",
+        path: "/restaurants/:slug",
         element: (
           <Restaurant />
         ),
+      },
+      {
+        path: "/restaurants",
+        element: <RestaurantsList />,
       },
       {
         path: "/*",
@@ -84,7 +95,7 @@ const router = createBrowserRouter([
         element: <EditRestaurant />
       },
       {
-        path: '/item/:slug',
+        path: '/items/:slug',
         element: <Item />
       },
       {
@@ -115,6 +126,10 @@ const router = createBrowserRouter([
         path: '/privacy-policy',
         element: <PrivacyPolicy />
       },
+      {
+        path: '/cookies',
+        element: <Cookies />
+      }
     ],
   },
 ])

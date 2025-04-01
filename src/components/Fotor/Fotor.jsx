@@ -309,21 +309,21 @@ const Fotor = () => {
             transition={{ delay: 0.7, duration: 0.5 }}
           >
             <motion.a
-              href="#"
+              href="/terms-of-service"
               className="text-gray-500 hover:text-orange-400 transition-colors duration-300 text-xs"
               whileHover={{ scale: 1.05, x: 2 }}
             >
               Terms
             </motion.a>
             <motion.a
-              href="#"
+              href="/privacy-policy"
               className="text-gray-500 hover:text-orange-400 transition-colors duration-300 text-xs"
               whileHover={{ scale: 1.05, x: 2 }}
             >
               Privacy
             </motion.a>
             <motion.a
-              href="#"
+              href="/cookies"
               className="text-gray-500 hover:text-orange-400 transition-colors duration-300 text-xs"
               whileHover={{ scale: 1.05, x: 2 }}
             >

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import PropTypes from 'prop-types';
-import './AddRestaurant.css';
 import { useDispatch, useSelector } from 'react-redux';
 import AppwriteResService from '../../appwrite/config'
 import { useNavigate } from 'react-router-dom';
@@ -22,6 +22,45 @@ const AddRestaurant = ({ restaurant }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
+  const [focusedField, setFocusedField] = useState(null);
+
+  // Animation variants
+  const formVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const inputVariants = {
+    focused: {
+      scale: 1.02,
+      boxShadow: "0 0 0 2px #ff6b6b",
+      transition: { duration: 0.2 }
+    },
+    unfocused: {
+      scale: 1,
+      boxShadow: "0 0 0 1px #ddd",
+      transition: { duration: 0.2 }
+    }
+  };
+
+  const buttonVariants = {
+    hover: {
+      scale: 1.02,
+      boxShadow: "0 5px 15px rgba(211, 47, 47, 0.3)"
+    },
+    tap: { scale: 0.98 },
+    disabled: {
+      opacity: 0.7,
+      cursor: "not-allowed"
+    }
+  };
 
   // Update form data if restaurant prop changes
   useEffect(() => {
@@ -206,56 +245,189 @@ const AddRestaurant = ({ restaurant }) => {
   }
 
   return (
-    <>
-      <div className="addrestaurant">
-        <div className="add-restaurant-form-container">
-          <h2><img src="/Images/logo.png" alt="" />Add Your Restaurant</h2>
+    <motion.div
+      className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-orange-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="max-w-7xl mx-auto flex flex-wrap justify-center gap-8">
+        <motion.div
+          className="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden"
+          variants={formVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <div className="px-8 py-6">
+            <motion.div
+              className="flex items-center justify-center mb-8"
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <img src="/Images/logo.png" alt="" className="h-16 mr-3" />
+              <h2 className="text-2xl font-bold text-gray-900">
+                {restaurant ? 'Update Restaurant' : 'Add Your Restaurant'}
+              </h2>
+            </motion.div>
 
-          {formError && <div className="form-message error">{formError}</div>}
-          {formSuccess && <div className="form-message success">{formSuccess}</div>}
+            <AnimatePresence>
+              {(formError || formSuccess) && (
+                <motion.div
+                  className={`mb-6 p-4 rounded-lg text-center ${formError
+                    ? 'bg-red-50 text-red-700 border border-red-200'
+                    : 'bg-green-50 text-green-700 border border-green-200'
+                    }`}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  {formError || formSuccess}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          <form ref={formRef} onSubmit={(e) => e.preventDefault()} encType="multipart/form-data">
-            <div className="input-group">
-              <label htmlFor="name">Restaurant Name</label>
-              <input type="text" id="name" name="name" onChange={handleChange} value={formData.name} required />
-            </div>
-            <div className="input-group">
-              <label htmlFor="address">Restaurant Full Address</label>
-              <input type="text" id="address" name="address" onChange={handleChange} value={formData.address} required />
-            </div>
-            <div className="input-group">
-              <label htmlFor="description">Restaurant Description</label>
-              <textarea cols={10} rows={4} type="text" id="description" name="description" onChange={handleChange} value={formData.description} required />
-            </div>
-            <div className="input-group">
-              <label htmlFor="image">Restaurant Image</label>
-              <input type="file" id="image" name="image" onChange={setimgfile} required={!restaurant} />
-            </div>
-          </form>
-        </div>
+            <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="space-y-6">
+              <div>
+                <motion.label
+                  htmlFor="name"
+                  className="block text-sm font-medium"
+                  animate={{ color: focusedField === 'name' ? '#d32f2f' : '#374151' }}
+                >
+                  Restaurant Name
+                </motion.label>
+                <motion.input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('name')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  variants={inputVariants}
+                  animate={focusedField === 'name' ? 'focused' : 'unfocused'}
+                />
+              </div>
 
-        {!restaurant && <Pricing
-          onSelectPlan={handlePlanSelect}
-          initialPlan={selectedPlan ? selectedPlan.plan : null}
-        />}
+              <div>
+                <motion.label
+                  htmlFor="address"
+                  className="block text-sm font-medium"
+                  animate={{ color: focusedField === 'address' ? '#d32f2f' : '#374151' }}
+                >
+                  Restaurant Full Address
+                </motion.label>
+                <motion.input
+                  type="text"
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('address')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  variants={inputVariants}
+                  animate={focusedField === 'address' ? 'focused' : 'unfocused'}
+                />
+              </div>
 
-        <div className="submit-button-container">
-          <button
+              <div>
+                <motion.label
+                  htmlFor="description"
+                  className="block text-sm font-medium"
+                  animate={{ color: focusedField === 'description' ? '#d32f2f' : '#374151' }}
+                >
+                  Restaurant Description
+                </motion.label>
+                <motion.textarea
+                  id="description"
+                  name="description"
+                  rows={4}
+                  value={formData.description}
+                  onChange={handleChange}
+                  onFocus={() => setFocusedField('description')}
+                  onBlur={() => setFocusedField(null)}
+                  required
+                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  variants={inputVariants}
+                  animate={focusedField === 'description' ? 'focused' : 'unfocused'}
+                />
+              </div>
+
+              <div>
+                <motion.label
+                  htmlFor="image"
+                  className="block text-sm font-medium"
+                  animate={{ color: focusedField === 'image' ? '#d32f2f' : '#374151' }}
+                >
+                  Restaurant Image
+                </motion.label>
+                <motion.input
+                  type="file"
+                  id="image"
+                  name="image"
+                  onChange={setimgfile}
+                  required={!restaurant}
+                  className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+                  onFocus={() => setFocusedField('image')}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </div>
+            </form>
+          </div>
+        </motion.div>
+
+        {!restaurant && (
+          <div className="w-full max-w-xl">
+            <Pricing
+              onSelectPlan={handlePlanSelect}
+              initialPlan={selectedPlan ? selectedPlan.plan : null}
+            />
+          </div>
+        )}
+
+        <motion.div
+          className="w-full max-w-md"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <motion.button
             type="button"
-            className={`submit-button ${isSubmitting ? 'submitting' : ''}`}
-            disabled={isSubmitting}
             onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
+            animate={isSubmitting ? "disabled" : ""}
           >
             {isSubmitting ? (
               <>
-                <span className="spinner"></span>
-                <span className="sr-only">{restaurant ? "Updating..." : "Adding..."}</span>
+                <motion.svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </motion.svg>
+                <span>{restaurant ? "Updating..." : "Adding..."}</span>
               </>
-            ) : restaurant ? "Update Restaurant" : "Add Restaurant"}
-          </button>
-        </div>
+            ) : (
+              restaurant ? "Update Restaurant" : "Add Restaurant"
+            )}
+          </motion.button>
+        </motion.div>
       </div>
-    </>
+    </motion.div>
   );
 }
 AddRestaurant.propTypes = {
