@@ -5,6 +5,7 @@ import { removeOrder, dropOrders } from "../../store/orderSlice";
 import AppwriteOrderService from '../../appwrite/orderconfig';
 import { Query } from "appwrite";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -39,32 +40,109 @@ const Cart = () => {
     setIsProcessing(true);
 
     try {
-      if (dbData) {
-        const dborderdata = dbData?.orderdata;
-        const updatedData = await AppwriteOrderService.updateOrder(dbData?.$id, {
-          orderdata: dborderdata,
-          newdata: foodData
-        });
+      // Calculate total amount and admin fee (5%)
+      const adminFee = Math.round(totalPrice * 0.05);
+      const finalAmount = totalPrice + adminFee;
 
-        if (updatedData) {
-          dispatch(dropOrders());
-          setShowConfirmation(true);
-        }
-      } else {
-        const dbOrder = await AppwriteOrderService.AddOrder({
-          email: userEmail,
-          orderdata: foodData
-        });
+      // Create Razorpay order
+      const response = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/create_order', {
+        amount: finalAmount * 100, // Convert to paise
+        currency: 'INR',
+        receipt: 'receipt#1',
+        notes: [
+          `order:${foodData.map(item => item.name).join(', ')}`,
+          `items:${foodData.length}`
+        ],
+      });
 
-        if (dbOrder) {
-          dispatch(dropOrders());
-          setShowConfirmation(true);
+      const order = await response.data;
+      console.log('Order created successfully:', order);
+
+      const options = {
+        key: 'rzp_test_SKvWaxTYYZYvIC',
+        amount: finalAmount * 100, // Convert to paise
+        currency: 'INR',
+        name: 'Rising Food Delivery',
+        description: `Order for ${foodData.length} items`,
+        order_id: order.id,
+        prefill: {
+          name: userEmail.split('@')[0],
+          email: userEmail
+        },
+        theme: {
+          color: '#ef4444'
+        },
+        handler: async function (response) {
+          try {
+            const verificationResult = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/verify-payment', {
+              razorpay_order_id: order.id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
+
+            if (verificationResult.data.status === 'success') {
+              // Only place the order after successful payment verification
+              try {
+                if (dbData) {
+                  const dborderdata = dbData?.orderdata;
+                  const updatedData = await AppwriteOrderService.updateOrder(dbData?.$id, {
+                    orderdata: dborderdata,
+                    newdata: foodData
+                  });
+
+                  if (updatedData) {
+                    dispatch(dropOrders());
+                    setShowConfirmation(true);
+                    setIsProcessing(false);
+                  } else {
+                    throw new Error("Failed to update order");
+                  }
+                } else {
+                  const dbOrder = await AppwriteOrderService.AddOrder({
+                    email: userEmail,
+                    orderdata: foodData
+                  });
+
+                  if (dbOrder) {
+                    dispatch(dropOrders());
+                    setShowConfirmation(true);
+                    setIsProcessing(false);
+                  } else {
+                    throw new Error("Failed to create order");
+                  }
+                }
+              } catch (orderError) {
+                console.error("Error placing order:", orderError);
+                setIsProcessing(false);
+              }
+            } else {
+              console.error("Payment verification failed");
+              setIsProcessing(false);
+            }
+          } catch (error) {
+            console.error("Payment verification error:", error);
+            setIsProcessing(false);
+          }
         }
-      }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+      razorpay.on('payment.failed', (response) => {
+        console.error("Payment failed:", response.error);
+        setIsProcessing(false);
+        // You might want to show an error message to the user here
+      });
+
+      razorpay.on('modal.closed', function () {
+        setIsProcessing(false);
+      });
+
     } catch (error) {
       console.error("Checkout error:", error);
-    } finally {
       setIsProcessing(false);
+      // You might want to show an error message to the user here
     }
   };
 
@@ -135,13 +213,13 @@ const Cart = () => {
 
   return (
     <motion.div
-      className="container mx-auto px-4 py-8"
+      className="container mx-auto px-2 sm:px-4 py-4 sm:py-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       <motion.h1
-        className="text-3xl font-bold text-white mb-6"
+        className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6"
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -155,16 +233,16 @@ const Cart = () => {
         initial="hidden"
         animate="visible"
       >
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
           <table className="w-full">
             <thead className="bg-gray-900 text-orange-500">
               <tr>
-                <th className="py-4 px-6 text-left">#</th>
-                <th className="py-4 px-6 text-left">Name</th>
-                <th className="py-4 px-6 text-left">Quantity</th>
-                <th className="py-4 px-6 text-left">Option</th>
-                <th className="py-4 px-6 text-left">Amount</th>
-                <th className="py-4 px-6 text-center">Action</th>
+                <th className="py-3 px-2 sm:px-6 text-left text-sm sm:text-base">#</th>
+                <th className="py-3 px-2 sm:px-6 text-left text-sm sm:text-base">Name</th>
+                <th className="py-3 px-2 sm:px-6 text-left text-sm sm:text-base">Qty</th>
+                <th className="py-3 px-2 sm:px-6 text-left text-sm sm:text-base">Option</th>
+                <th className="py-3 px-2 sm:px-6 text-left text-sm sm:text-base">Amount</th>
+                <th className="py-3 px-2 sm:px-6 text-center text-sm sm:text-base">Action</th>
               </tr>
             </thead>
             <tbody>
@@ -181,19 +259,19 @@ const Cart = () => {
                     exit="exit"
                     layout
                   >
-                    <td className="py-4 px-6 text-white">{index + 1}</td>
-                    <td className="py-4 px-6 text-white font-medium">{food.name}</td>
-                    <td className="py-4 px-6 text-white">{food.qty}</td>
-                    <td className="py-4 px-6 text-white">{food.size}</td>
-                    <td className="py-4 px-6 text-white">₹{food.price}</td>
-                    <td className="py-4 px-6 text-center">
+                    <td className="py-3 px-2 sm:px-6 text-white text-sm sm:text-base">{index + 1}</td>
+                    <td className="py-3 px-2 sm:px-6 text-white font-medium text-sm sm:text-base">{food.name}</td>
+                    <td className="py-3 px-2 sm:px-6 text-white text-sm sm:text-base">{food.qty}</td>
+                    <td className="py-3 px-2 sm:px-6 text-white text-sm sm:text-base">{food.size}</td>
+                    <td className="py-3 px-2 sm:px-6 text-white text-sm sm:text-base">₹{food.price}</td>
+                    <td className="py-3 px-2 sm:px-6 text-center">
                       <motion.button
-                        className="p-2 rounded-full bg-red-500 bg-opacity-20 hover:bg-opacity-100 transition-colors"
+                        className="p-1.5 sm:p-2 rounded-full bg-red-500 bg-opacity-20 hover:bg-opacity-100 transition-colors"
                         whileHover={{ scale: 1.1, rotate: 5 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => handleDelete(index)}
                       >
-                        <DeleteIcon className="text-red-500" />
+                        <DeleteIcon className="text-red-500 text-sm sm:text-base" />
                       </motion.button>
                     </td>
                   </motion.tr>
@@ -205,36 +283,44 @@ const Cart = () => {
       </motion.div>
 
       <motion.div
-        className="mt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+        className="mt-4 sm:mt-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 className="text-xl text-gray-300 mb-2">Order Summary</h2>
-          <div className="flex justify-between items-center border-t border-gray-700 pt-4 mt-2">
-            <span className="text-white">Total Items:</span>
-            <span className="text-white font-medium">{foodData.length}</span>
+        <div className="bg-gray-800 p-4 sm:p-6 rounded-lg shadow-lg w-full md:w-auto">
+          <h2 className="text-lg sm:text-xl text-gray-300 mb-2">Order Summary</h2>
+          <div className="flex justify-between items-center border-t border-gray-700 pt-3 sm:pt-4 mt-2">
+            <span className="text-white text-sm sm:text-base">Total Items:</span>
+            <span className="text-white font-medium text-sm sm:text-base">{foodData.length}</span>
           </div>
           <div className="flex justify-between items-center mt-2">
-            <span className="text-white">Total Amount:</span>
+            <span className="text-white text-sm sm:text-base">Subtotal:</span>
+            <span className="text-white text-sm sm:text-base">₹{totalPrice}</span>
+          </div>
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-white text-sm sm:text-base">Admin Fee (5%):</span>
+            <span className="text-white text-sm sm:text-base">₹{Math.round(totalPrice * 0.05)}</span>
+          </div>
+          <div className="flex justify-between items-center mt-2 border-t border-gray-700 pt-2">
+            <span className="text-white font-medium text-sm sm:text-base">Total Amount:</span>
             <motion.span
-              className="text-2xl font-bold text-orange-500"
+              className="text-xl sm:text-2xl font-bold text-orange-500"
               key={totalPrice}
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
             >
-              ₹{totalPrice}
+              ₹{totalPrice + Math.round(totalPrice * 0.05)}
             </motion.span>
           </div>
         </div>
 
         <motion.button
-          className={`px-8 py-3 rounded-md text-white font-medium ${isProcessing
+          className={`px-4 sm:px-8 py-2.5 sm:py-3 rounded-md text-white font-medium w-full md:w-auto text-sm sm:text-base ${isProcessing
             ? 'bg-gray-600 cursor-not-allowed'
             : 'bg-green-600 hover:bg-green-700'
-            } transition-colors shadow-lg flex items-center gap-2`}
+            } transition-colors shadow-lg flex items-center justify-center gap-2`}
           whileHover={!isProcessing ? { scale: 1.05 } : {}}
           whileTap={!isProcessing ? { scale: 0.95 } : {}}
           onClick={handleCheckOut}

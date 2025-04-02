@@ -16,6 +16,8 @@ const AddRestaurant = ({ restaurant }) => {
     name: restaurant?.name || '',
     address: restaurant?.address || '',
     description: restaurant?.description || '',
+    location: restaurant?.location || { lat: 0, lng: 0 },
+    formattedAddress: restaurant?.formattedAddress || ''
   });
   const [img, setImg] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -69,6 +71,8 @@ const AddRestaurant = ({ restaurant }) => {
         name: restaurant.name || '',
         address: restaurant.address || '',
         description: restaurant.description || '',
+        location: restaurant.location || { lat: 0, lng: 0 },
+        formattedAddress: restaurant.formattedAddress || ''
       });
     }
   }, [restaurant]);
@@ -287,7 +291,7 @@ const AddRestaurant = ({ restaurant }) => {
               )}
             </AnimatePresence>
 
-            <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="space-y-6">
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <motion.label
                   htmlFor="name"
@@ -308,6 +312,7 @@ const AddRestaurant = ({ restaurant }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   variants={inputVariants}
                   animate={focusedField === 'name' ? 'focused' : 'unfocused'}
+                  placeholder="Enter your restaurant name"
                 />
               </div>
 
@@ -319,8 +324,7 @@ const AddRestaurant = ({ restaurant }) => {
                 >
                   Restaurant Full Address
                 </motion.label>
-                <motion.input
-                  type="text"
+                <motion.textarea
                   id="address"
                   name="address"
                   value={formData.address}
@@ -328,9 +332,11 @@ const AddRestaurant = ({ restaurant }) => {
                   onFocus={() => setFocusedField('address')}
                   onBlur={() => setFocusedField(null)}
                   required
+                  rows={3}
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   variants={inputVariants}
                   animate={focusedField === 'address' ? 'focused' : 'unfocused'}
+                  placeholder="Enter complete restaurant address including street, city, state, and postal code"
                 />
               </div>
 
@@ -354,6 +360,7 @@ const AddRestaurant = ({ restaurant }) => {
                   className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   variants={inputVariants}
                   animate={focusedField === 'description' ? 'focused' : 'unfocused'}
+                  placeholder="Describe your restaurant, including cuisine type, specialties, and unique features"
                 />
               </div>
 
@@ -374,7 +381,11 @@ const AddRestaurant = ({ restaurant }) => {
                   className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
                   onFocus={() => setFocusedField('image')}
                   onBlur={() => setFocusedField(null)}
+                  accept="image/*"
                 />
+                <p className="mt-1 text-sm text-gray-500">
+                  Upload a high-quality image of your restaurant (JPG, PNG, or GIF)
+                </p>
               </div>
             </form>
           </div>
@@ -437,6 +448,11 @@ AddRestaurant.propTypes = {
     description: PropTypes.string,
     $id: PropTypes.string,
     image: PropTypes.string,
+    location: PropTypes.shape({
+      lat: PropTypes.number,
+      lng: PropTypes.number
+    }),
+    formattedAddress: PropTypes.string
   }),
 };
 
