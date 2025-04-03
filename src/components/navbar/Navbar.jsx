@@ -47,7 +47,7 @@ const Navbar = () => {
             {restaurant ? (
               <li>
                 <Link
-                  to={`/restaurant/${restaurant?.$id}`}
+                  to={`/restaurants/${restaurant?.$id}`}
                   className="hover:text-orange-500 transition-colors"
                 >
                   Your Restaurant
