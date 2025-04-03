@@ -25,6 +25,7 @@ import ContactUs from './screens/ContactUs/ContactUs.jsx'
 import RestaurantsList from './screens/RestaurantsList/RestaurantsList.jsx'
 import Items from './screens/Items/Items.jsx'
 import Cookies from './screens/Cookies/Cookies.jsx'
+import UserOrders from './screens/UserOrders/UserOrders.jsx'
 
 const router = createBrowserRouter([
   {
@@ -129,6 +130,10 @@ const router = createBrowserRouter([
       {
         path: '/cookies',
         element: <Cookies />
+      },
+      {
+        path: '/user-orders',
+        element: <UserOrders />
       }
     ],
   },

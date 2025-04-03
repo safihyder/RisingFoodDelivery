@@ -40,7 +40,10 @@ const Restaurant = () => {
         } else {
             navigate('/')
         }
-        AppwriteItemService.getItems([Query.contains('resid', slug), category ? Query.equal('category', category) : Query.contains('category', category)])
+        AppwriteItemService.getItems([
+            Query.contains('resid', slug),
+            category ? Query.equal('category', category) : null
+        ].filter(Boolean))
             .then((data) => {
                 if (data?.documents) {
                     const processedItems = data.documents.map((item) => ({
@@ -237,45 +240,61 @@ const Restaurant = () => {
                                 <div className="max-w-4xl mx-auto mb-8 px-4">
                                     <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-6">
                                         <h1 className='text-center text-2xl sm:text-3xl md:text-4xl text-orange-400 font-bold'>Menu</h1>
-                                        <FormControl size="small" className='min-w-[120px] sm:min-w-[150px]'>
-                                            <InputLabel id="demo-simple-select-label">Category</InputLabel>
-                                            <Select
-                                                labelId="demo-simple-select-label"
-                                                id="demo-simple-select"
-                                                label="Category"
-                                                placeholder='Select'
-                                                onChange={handleChange}
-                                                value={category}
-                                            >
-                                                <MenuItem value={''}>All</MenuItem>
-                                                <MenuItem value={'vegetarian'}>Vegetarian</MenuItem>
-                                                <MenuItem value={'nonVegetarian'}>Non Vegetarian</MenuItem>
-                                            </Select>
-                                        </FormControl>
+
                                     </div>
 
-                                    {/* Search Bar */}
-                                    <div className="relative flex-1 w-full max-w-md mx-auto mb-4">
-                                        <input
-                                            type="text"
-                                            placeholder="Search food items..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                        />
-                                        <svg
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    {/* Search and Filter Row */}
+                                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                                        {/* Search Bar */}
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="text"
+                                                placeholder="Search food items..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                             />
-                                        </svg>
+                                            <svg
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                />
+                                            </svg>
+                                        </div>
+
+                                        {/* Category Select */}
+                                        <div className="sm:w-48">
+                                            <FormControl fullWidth>
+                                                <InputLabel id="category-select-label">Category</InputLabel>
+                                                <Select
+                                                    labelId="category-select-label"
+                                                    id="category-select"
+                                                    value={category}
+                                                    label="Category"
+                                                    onChange={handleChange}
+                                                    className="rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                                >
+                                                    <MenuItem value="">All Categories</MenuItem>
+                                                    {items.reduce((categories, item) => {
+                                                        if (item.category && !categories.includes(item.category)) {
+                                                            categories.push(item.category);
+                                                        }
+                                                        return categories;
+                                                    }, []).map((category) => (
+                                                        <MenuItem key={category} value={category}>
+                                                            {category}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </div>
                                     </div>
 
                                     {/* Results Count */}

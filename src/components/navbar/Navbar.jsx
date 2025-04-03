@@ -8,11 +8,14 @@ import AuthService from "../../appwrite/auth"
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import AppwriteResService from '../../appwrite/config';
+import AppwriteOrderService from '../../appwrite/orderconfig';
 
 const Navbar = () => {
   const foodItems = useSelector(state => state.order.userorder)
   const [restaurant, setrestaurant] = useState(null)
+  const [hasOrders, setHasOrders] = useState(false)
   const userData = useSelector(state => state.auth.userData)
+
   useEffect(() => {
     AppwriteResService.getRestaurants([Query.contains('userId', userData?.$id)])
       .then((restData) => {
@@ -20,7 +23,23 @@ const Navbar = () => {
           setrestaurant(restData.documents[0])
         }
       })
+
+    if (userData && userData.email) {
+      AppwriteOrderService.getOrders([Query.equal('email', userData.email)])
+        .then((orderData) => {
+          if (orderData && orderData.documents.length > 0) {
+            setHasOrders(true)
+          } else {
+            setHasOrders(false)
+          }
+        })
+        .catch(error => {
+          console.error("Error checking orders:", error)
+          setHasOrders(false)
+        })
+    }
   }, [userData, restaurant])
+
   const authStatus = useSelector((state) => state.auth.status)
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
@@ -60,6 +79,17 @@ const Navbar = () => {
                   className="hover:text-orange-500 transition-colors"
                 >
                   Add a Restaurant
+                </Link>
+              </li>
+            )}
+
+            {authStatus && hasOrders && (
+              <li>
+                <Link
+                  to="/user-orders"
+                  className="hover:text-orange-500 transition-colors"
+                >
+                  Your Orders
                 </Link>
               </li>
             )}
@@ -161,6 +191,18 @@ const Navbar = () => {
                         onClick={() => setIsOpen(false)}
                       >
                         Add a Restaurant
+                      </Link>
+                    </li>
+                  )}
+
+                  {authStatus && hasOrders && (
+                    <li>
+                      <Link
+                        to="/user-orders"
+                        className="block py-2 hover:text-yellow-300 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Your Orders
                       </Link>
                     </li>
                   )}

@@ -130,7 +130,7 @@ const AddRestaurant = ({ restaurant }) => {
         if (dbRest) {
           setFormSuccess('Restaurant updated successfully!');
           setTimeout(() => {
-            navigate(`/restaurant/${restaurant.$id}`);
+            navigate(`/restaurants/${restaurant.$id}`);
           }, 1500);
         }
       } else {
