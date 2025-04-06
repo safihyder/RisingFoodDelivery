@@ -60,9 +60,13 @@ const ContactUs = () => {
                         <div className="mb-6">
                             <h3 className="text-lg font-medium mb-3 text-gray-800">Our Address</h3>
                             <p className="text-gray-700">
-                                123 Food Street, Culinary District<br />
-                                Foodie City, FC 12345<br />
-                                India
+                                Handwara-Baramulla Road<br />
+                                Near Qaziabad, Handwara<br />
+                                Kupwara District, Kashmir - 193221<br />
+                                Jammu & Kashmir, India
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                                GPS: 33.7651949° N, 74.0859131° E
                             </p>
                         </div>
 

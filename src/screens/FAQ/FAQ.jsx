@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const FAQ = () => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -98,7 +99,7 @@ const FAQ = () => {
                 <p className="text-gray-700">
                     Email: <a href="mailto:risingfooddelivery0987@gmail.com" className="text-orange-500 hover:underline">risingfooddelivery0987@gmail.com</a><br />
                     Phone: +91-7889365127<br />
-                    Or visit our <a href="/contact-us" className="text-orange-500 hover:underline">Contact Us</a> page
+                    Or visit our <Link to="/contact-us" className="text-orange-500 hover:underline">Contact Us</Link> page
                 </p>
             </div>
 
