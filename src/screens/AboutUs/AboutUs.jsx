@@ -155,7 +155,7 @@ const AboutUs = () => {
                                 alt="Delivery Partner"
                                 className="rounded-lg shadow-2xl max-w-md mx-auto transform rotate-2 hover:rotate-0 transition-transform duration-300"
                                 onError={(e) => {
-                                    e.target.src = "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1240&q=80";
+                                    e.target.src = "";
                                     e.target.onerror = null;
                                 }}
                             />
@@ -179,7 +179,7 @@ const AboutUs = () => {
                                     alt="Safi Hyder"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/men/32.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -197,7 +197,7 @@ const AboutUs = () => {
                                     alt="Priya Sharma"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/women/44.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -215,7 +215,7 @@ const AboutUs = () => {
                                     alt="Rahul Verma"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/men/68.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -233,7 +233,7 @@ const AboutUs = () => {
                                     alt="Ananya Patel"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/women/65.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -271,7 +271,7 @@ const AboutUs = () => {
                                     alt="Vikram Singh"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/men/41.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -296,7 +296,7 @@ const AboutUs = () => {
                                     alt="Meera Kapoor"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/women/63.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
@@ -321,7 +321,7 @@ const AboutUs = () => {
                                     alt="Arjun Mehta"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
-                                        e.target.src = "https://randomuser.me/api/portraits/men/75.jpg";
+                                        e.target.src = "";
                                         e.target.onerror = null;
                                     }}
                                 />
