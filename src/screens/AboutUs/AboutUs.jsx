@@ -107,6 +107,63 @@ const AboutUs = () => {
                 </div>
             </section>
 
+            {/* Join Our Team Section */}
+            <section className="py-16 bg-gradient-to-r from-orange-500 to-red-600 text-white">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                        <div>
+                            <h2 className="text-3xl font-bold mb-6">Join Our Delivery Team</h2>
+                            <p className="text-lg mb-6">
+                                Looking for flexible work with competitive pay? Join our team of delivery partners and be part of our mission to deliver exceptional food experiences.
+                            </p>
+                            <ul className="space-y-4 mb-8">
+                                <li className="flex items-start">
+                                    <svg className="h-6 w-6 text-white mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Flexible hours - work when it suits you</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="h-6 w-6 text-white mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Competitive earnings with bonus opportunities</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="h-6 w-6 text-white mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Weekly payouts directly to your bank account</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <svg className="h-6 w-6 text-white mr-3 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Opportunity to grow with a rapidly expanding company</span>
+                                </li>
+                            </ul>
+                            <a
+                                href="/delivery-partner-registration"
+                                className="inline-block bg-white text-red-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1"
+                            >
+                                Apply Now
+                            </a>
+                        </div>
+                        <div className="hidden md:block">
+                            <img
+                                src="/Images/delivery-partner.jpg"
+                                alt="Delivery Partner"
+                                className="rounded-lg shadow-2xl max-w-md mx-auto transform rotate-2 hover:rotate-0 transition-transform duration-300"
+                                onError={(e) => {
+                                    e.target.src = "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1240&q=80";
+                                    e.target.onerror = null;
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Our Team Section */}
             <section className="py-16 bg-white">
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
@@ -118,7 +175,7 @@ const AboutUs = () => {
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300">
                             <div className="h-64 overflow-hidden">
                                 <img
-                                    src="/Images/team-1.jpg"
+                                    src="/"
                                     alt="Safi Hyder"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -136,7 +193,7 @@ const AboutUs = () => {
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300">
                             <div className="h-64 overflow-hidden">
                                 <img
-                                    src="/Images/team-2.jpg"
+                                    src="/"
                                     alt="Priya Sharma"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -154,7 +211,7 @@ const AboutUs = () => {
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300">
                             <div className="h-64 overflow-hidden">
                                 <img
-                                    src="/Images/team-3.jpg"
+                                    src="/"
                                     alt="Rahul Verma"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -172,7 +229,7 @@ const AboutUs = () => {
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300">
                             <div className="h-64 overflow-hidden">
                                 <img
-                                    src="/Images/team-4.jpg"
+                                    src="/"
                                     alt="Ananya Patel"
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -210,7 +267,7 @@ const AboutUs = () => {
                             </div>
                             <div className="flex items-center">
                                 <img
-                                    src="/Images/testimonial-1.jpg"
+                                    src=""
                                     alt="Vikram Singh"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
@@ -235,7 +292,7 @@ const AboutUs = () => {
                             </div>
                             <div className="flex items-center">
                                 <img
-                                    src="/Images/testimonial-2.jpg"
+                                    src="/"
                                     alt="Meera Kapoor"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
@@ -260,7 +317,7 @@ const AboutUs = () => {
                             </div>
                             <div className="flex items-center">
                                 <img
-                                    src="/Images/testimonial-3.jpg"
+                                    src="/"
                                     alt="Arjun Mehta"
                                     className="w-12 h-12 rounded-full object-cover mr-4"
                                     onError={(e) => {
