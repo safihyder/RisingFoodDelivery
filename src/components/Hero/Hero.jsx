@@ -63,9 +63,10 @@ const Hero = () => {
                             <img
                                 src="/Images/logo.png"
                                 alt="Rising Food Delivery Logo"
+                                loading="eager"
                                 className="w-28 h-28 absolute -top-8 -left-8 z-10 drop-shadow-2xl"
                                 onError={(e) => {
-                                    e.target.src = "/Images/logo1.png";
+                                    e.target.src = "/Images/logo.png";
                                     e.target.onerror = null;
                                 }}
                             />

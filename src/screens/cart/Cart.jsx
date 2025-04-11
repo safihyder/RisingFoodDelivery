@@ -17,6 +17,7 @@ const Cart = () => {
 
   const foodData = useSelector(state => state.order.userorder);
   const userEmail = useSelector(state => state.auth.userData.email);
+  
   const totalPrice = foodData.reduce((total, food) => total + food.price, 0);
 
   useEffect(() => {

@@ -192,6 +192,17 @@ const Fotor = () => {
                   </Link>
                 </motion.li>
               ))}
+              <motion.li whileHover={{ x: 5 }} transition={{ type: 'spring', stiffness: 300 }}>
+                <Link
+                  to="/delivery-partner-registration"
+                  className="text-gray-300 hover:text-orange-400 transition-colors duration-300 flex items-center text-sm"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                  Become a Delivery Partner
+                </Link>
+              </motion.li>
             </motion.ul>
           </motion.div>
 

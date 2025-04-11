@@ -11,6 +11,7 @@ import { Query } from 'appwrite';
 import Loading from '../../components/Loading';
 import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../../components/Card/Card';
+import { image } from 'framer-motion/client';
 
 const Restaurant = () => {
     const [resData, setResData] = useState(null)
@@ -131,6 +132,12 @@ const Restaurant = () => {
                         <Link className='shadow-lg gap-1 w-[120px] sm:w-[150px] h-[40px] sm:h-[50px] bg-white rounded-md flex justify-center items-center hover:bg-slate-100 transition-colors' to='/addfoodItem'>
                             <img className='w-[24px] h-[24px] sm:w-[30px] sm:h-[30px]' src="/Images/addItem.png" alt="" />
                             <h2 className='font-semibold text-sm sm:text-base'>Add Item</h2>
+                        </Link>
+                        <Link className='shadow-lg gap-1 w-[120px] sm:w-[150px] h-[40px] sm:h-[50px] bg-white rounded-md flex justify-center items-center hover:bg-slate-100 transition-colors' to={`/restaurant-orders/${slug}`}>
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-[24px] h-[24px] sm:w-[30px] sm:h-[30px] text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <h2 className='font-semibold text-sm sm:text-base'>Orders</h2>
                         </Link>
                     </motion.div>
                 )}
@@ -306,8 +313,13 @@ const Restaurant = () => {
                                 {/* Items Grid */}
                                 <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 justify-items-center">
                                     {filteredItems.length > 0 ? (
-                                        filteredItems.map((item, index) => (
-                                            <Card key={index} item={item} />
+                                        filteredItems.map((item) => (
+                                            <Card
+                                                key={item.$id}
+                                                item={item}
+                                                image={item.image}
+                                                isManager={isManager}
+                                            />
                                         ))
                                     ) : (
                                         <div className="col-span-full text-center py-12">

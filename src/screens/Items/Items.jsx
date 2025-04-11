@@ -54,7 +54,8 @@ const Items = ({ category, restaurantName }) => {
         fetchItems();
     }, [category, restaurantName]);
 
-    useEffect(() => {
+
+     useEffect(() => {
         if (!items) return;
 
         let filtered = [...items];

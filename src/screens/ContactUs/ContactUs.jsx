@@ -109,7 +109,6 @@ const ContactUs = () => {
                             </div>
                         </div>
                     </div>
-
                     {/* Contact Form */}
                     <div className="bg-white rounded-lg shadow-sm p-6">
                         <h2 className="text-2xl font-semibold mb-6 text-gray-800">Send Us a Message</h2>

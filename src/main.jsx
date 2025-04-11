@@ -26,7 +26,12 @@ import RestaurantsList from './screens/RestaurantsList/RestaurantsList.jsx'
 import Items from './screens/Items/Items.jsx'
 import Cookies from './screens/Cookies/Cookies.jsx'
 import UserOrders from './screens/UserOrders/UserOrders.jsx'
+import DeliveryPartnerRegistration from './screens/DeliveryPartnerRegistration/DeliveryPartnerRegistration.jsx'
+import RestaurantOrders from './screens/RestaurantOrders/RestaurantOrders.jsx'
+// import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 
+// Register the service worker
+// registerServiceWorker();
 const router = createBrowserRouter([
   {
     path: "/",
@@ -134,6 +139,14 @@ const router = createBrowserRouter([
       {
         path: '/user-orders',
         element: <UserOrders />
+      },
+      {
+        path: '/delivery-partner-registration',
+        element: <DeliveryPartnerRegistration />
+      },
+      {
+        path: '/restaurant-orders/:slug',
+        element: <RestaurantOrders />
       }
     ],
   },
