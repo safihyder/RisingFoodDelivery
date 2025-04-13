@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import './AddFoodItem.css';
+// import './AddFoodItem.css';
 import PropTypes from 'prop-types';
 import AppwriteItemService from '../../appwrite/itemsconfig'
 import AppwriteResService from '../../appwrite/config'
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Query } from 'appwrite';
+
 const AddFoodItem = ({ foodItem }) => {
   const userData = useSelector(state => state.auth.userData)
   const [restaurant, setrestaurant] = useState([])
@@ -118,72 +119,156 @@ const AddFoodItem = ({ foodItem }) => {
   };
 
   return (
-    <>
-      <div className="addFoodItem">
-        <div className="add-food-item-container">
-          <h2>{foodItem ? 'Update Food Item' : 'Add a New Food Item'}</h2>
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-orange-50">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="px-8 py-6">
+          <div className="flex items-center justify-center mb-8">
+            <img src="/Images/logo.png" alt="Rising Food Delivery Logo" className="h-16 mr-3" />
+            <h2 className="text-2xl font-bold text-gray-900">
+              {foodItem ? 'Update Food Item' : 'Add a New Food Item'}
+            </h2>
+          </div>
 
-          {formError && <div className="form-message error">{formError}</div>}
-          {formSuccess && <div className="form-message success">{formSuccess}</div>}
+          {formError && (
+            <div className="mb-6 p-4 rounded-lg text-center bg-red-50 text-red-700 border border-red-200">
+              {formError}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit} encType="multipart/form-data">
-            <div className="input-group">
-              <label htmlFor="name">Item Name</label>
-              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} required />
+          {formSuccess && (
+            <div className="mb-6 p-4 rounded-lg text-center bg-green-50 text-green-700 border border-green-200">
+              {formSuccess}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Item Name<span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                  Price<span className="text-red-500 ml-1">*</span>
+                </label>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  min="0"
+                  step="0.01"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                  Category<span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="">Select a category</option>
+                  <option value="vegetarian">Vegetarian</option>
+                  <option value="nonVegetarian">Non-Vegetarian</option>
+                  {/* Add more options as needed */}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                  Status<span className="text-red-500 ml-1">*</span>
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
             </div>
 
-            <div className="input-group">
-              <label htmlFor="description">Description</label>
-              <textarea id="description" name="description" value={formData.description} onChange={handleChange} required />
+            <div className="space-y-2">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                Description<span className="text-red-500 ml-1">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                required
+                rows="4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
             </div>
 
-            <div className="input-group">
-              <label htmlFor="price">Price</label>
-              <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} required />
+            <div className="space-y-2">
+              <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+                Item Image<span className="text-red-500 ml-1">*</span>
+              </label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                onChange={handleChange}
+                required={!foodItem}
+                accept="image/*"
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
+              />
+              <p className="text-xs text-gray-500">
+                Upload a high-quality image of your food item (JPG, PNG, or GIF)
+              </p>
             </div>
-
-            <div className="input-group">
-              <label htmlFor="category">Category</label>
-              <select id="category" name="category" value={formData.category} onChange={handleChange} required>
-                <option value="vegetarian">Vegetarian</option>
-                <option value="nonVegetarian">Non-Vegetarian</option>
-                {/* Add more options as needed */}
-              </select>
-            </div>
-            <div className="input-group">
-              <label htmlFor="status">Status</label>
-              <select id="status" name="status" value={formData.status} onChange={handleChange} required>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                {/* Add more options as needed */}
-              </select>
-            </div>
-            {/* Image Upload */}
-            <div className="input-group">
-              <label htmlFor="image">Item Image</label>
-              <input type="file" id="image" name="image" onChange={handleChange} required={!foodItem} />
-            </div>
-
-            {/* ... (other input fields for dietary restrictions, ingredients, etc.) */}
 
             <button
               type="submit"
-              className={isSubmitting ? 'submitting' : ''}
               disabled={isSubmitting}
+              className={`w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               {isSubmitting ? (
-                <>
-                  <span className="spinner"></span>
-                  <span className="sr-only">{foodItem ? 'Updating...' : 'Adding...'}</span>
-                </>
-              ) : (foodItem ? 'Update Item' : 'Add Item')}
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>{foodItem ? 'Updating...' : 'Adding...'}</span>
+                </div>
+              ) : (
+                foodItem ? 'Update Item' : 'Add Item'
+              )}
             </button>
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
+
 AddFoodItem.propTypes = {
   foodItem: PropTypes.shape({
     name: PropTypes.string,

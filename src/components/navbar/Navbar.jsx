@@ -9,11 +9,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import AppwriteResService from '../../appwrite/config';
 import AppwriteOrderService from '../../appwrite/orderconfig';
+import deliveryPartnerService from '../../appwrite/deliveryPartnerConfig';
 
 const Navbar = () => {
   const foodItems = useSelector(state => state.order.userorder)
   const [restaurant, setrestaurant] = useState(null)
   const [hasOrders, setHasOrders] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [isDeliveryPartner, setIsDeliveryPartner] = useState(false)
   const userData = useSelector(state => state.auth.userData)
 
   useEffect(() => {
@@ -24,7 +27,7 @@ const Navbar = () => {
         }
       })
 
-    if (userData && userData.email) {
+    if (userData && userData.$id) {
       AppwriteOrderService.getOrders([Query.equal('email', userData.email)])
         .then((orderData) => {
           if (orderData && orderData.documents.length > 0) {
@@ -36,6 +39,30 @@ const Navbar = () => {
         .catch(error => {
           console.error("Error checking orders:", error)
           setHasOrders(false)
+        })
+
+      // Check if user is admin
+      AuthService.isUserAdmin()
+        .then(adminStatus => {
+          setIsAdmin(adminStatus)
+        })
+        .catch(error => {
+          console.error("Error checking admin status:", error)
+          setIsAdmin(false)
+        })
+
+      // Check if user is a delivery partner
+      deliveryPartnerService.getDeliveryPartnerByUserId(userData.$id)
+        .then(partner => {
+          if (partner && partner.status === 'approved') {
+            setIsDeliveryPartner(true)
+          } else {
+            setIsDeliveryPartner(false)
+          }
+        })
+        .catch(error => {
+          console.error("Error checking delivery partner status:", error)
+          setIsDeliveryPartner(false)
         })
     }
   }, [userData, restaurant])
@@ -90,6 +117,39 @@ const Navbar = () => {
                   className="hover:text-orange-500 transition-colors"
                 >
                   Your Orders
+                </Link>
+              </li>
+            )}
+
+            {authStatus && isDeliveryPartner && (
+              <li>
+                <Link
+                  to="/delivery-partner-dashboard"
+                  className="hover:text-orange-500 transition-colors font-semibold text-orange-600"
+                >
+                  Delivery Dashboard
+                </Link>
+              </li>
+            )}
+
+            {authStatus && !isDeliveryPartner && (
+              <li>
+                <Link
+                  to="/delivery-partner-registration"
+                  className="hover:text-orange-500 transition-colors"
+                >
+                  Become a Delivery Partner
+                </Link>
+              </li>
+            )}
+
+            {authStatus && isAdmin && (
+              <li>
+                <Link
+                  to="/admin"
+                  className="hover:text-orange-500 transition-colors font-semibold text-orange-600"
+                >
+                  Admin Dashboard
                 </Link>
               </li>
             )}
@@ -207,6 +267,42 @@ const Navbar = () => {
                     </li>
                   )}
 
+                  {authStatus && isDeliveryPartner && (
+                    <li>
+                      <Link
+                        to="/delivery-partner-dashboard"
+                        className="block py-2 hover:text-yellow-300 transition-colors font-semibold"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Delivery Dashboard
+                      </Link>
+                    </li>
+                  )}
+
+                  {authStatus && !isDeliveryPartner && (
+                    <li>
+                      <Link
+                        to="/delivery-partner-registration"
+                        className="block py-2 hover:text-yellow-300 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Become a Delivery Partner
+                      </Link>
+                    </li>
+                  )}
+
+                  {authStatus && isAdmin && (
+                    <li>
+                      <Link
+                        to="/admin"
+                        className="block py-2 hover:text-yellow-300 transition-colors font-semibold"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                    </li>
+                  )}
+
                   {!authStatus && (
                     <>
                       <li>
@@ -234,32 +330,32 @@ const Navbar = () => {
                     <li>
                       <button
                         onClick={() => {
-                          logoutHandler();
                           setIsOpen(false);
+                          logoutHandler();
                         }}
-                        className="block py-2 hover:text-yellow-300 transition-colors font-medium text-left w-full"
+                        className="block w-full text-left py-2 hover:text-yellow-300 transition-colors"
                       >
                         Logout
                       </button>
                     </li>
                   )}
 
-                  {authStatus && (
-                    <li className="mt-4">
+                  <li>
+                    {authStatus && (
                       <button
                         onClick={() => {
-                          loadCart();
                           setIsOpen(false);
+                          loadCart();
                         }}
-                        className="flex items-center gap-2 bg-white text-red-600 px-4 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg w-full justify-center"
+                        className="block w-full px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center justify-center gap-2"
                       >
-                        Cart
-                        <Badge badgeContent={foodItems.length} color='error'>
-                          <img src="/Images/cart.png" alt="" className="h-6 w-6" />
+                        <span>Cart</span>
+                        <Badge badgeContent={foodItems.length} color="error">
+                          <img src="/Images/cart-white.png" alt="Cart" className="h-5 w-5" />
                         </Badge>
                       </button>
-                    </li>
-                  )}
+                    )}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -267,7 +363,7 @@ const Navbar = () => {
         </div>
       </nav>
     </div>
-  )
-}
+  );
+};
 
 export default Navbar;

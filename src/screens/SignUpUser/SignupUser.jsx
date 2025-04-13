@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import Fotor from '../../components/Fotor/Fotor';
 import AuthService from "../../appwrite/auth";
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/authSlice';
@@ -59,7 +58,7 @@ const SignupUser = () => {
     }
 
     try {
-      const userData = await AuthService.createAccount(formData.name,formData.email, formData.password);
+      const userData = await AuthService.createAccount(formData.name, formData.email, formData.password);
       if (userData) {
         setFormSuccess('Account created successfully! Logging you in...');
         dispatch(login({ userData }));
@@ -156,143 +155,123 @@ const SignupUser = () => {
             </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <motion.label
-                  htmlFor="name"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'name' ? '#d32f2f' : '#374151' }}
-                >
-                  Full Name
-                </motion.label>
-                <motion.input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('name')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  variants={inputVariants}
-                  animate={focusedField === 'name' ? 'focused' : 'unfocused'}
-                />
-              </div>
-
-              <div>
-                <motion.label
-                  htmlFor="email"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'email' ? '#d32f2f' : '#374151' }}
-                >
-                  Email
-                </motion.label>
-                <motion.input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  variants={inputVariants}
-                  animate={focusedField === 'email' ? 'focused' : 'unfocused'}
-                />
-              </div>
-
-              <div>
-                <motion.label
-                  htmlFor="password"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'password' ? '#d32f2f' : '#374151' }}
-                >
-                  Password
-                </motion.label>
-                <motion.input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  variants={inputVariants}
-                  animate={focusedField === 'password' ? 'focused' : 'unfocused'}
-                />
-                {focusedField === 'password' && (
-                  <motion.div
-                    className="mt-2 space-y-2"
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <motion.label
+                    htmlFor="name"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'name' ? '#d32f2f' : '#374151' }}
                   >
-                    <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${passwordStrength * 100}%` }}
-                        style={{
-                          backgroundColor: passwordStrength <= 0.25 ? '#ef4444' :
-                            passwordStrength <= 0.5 ? '#fbbf24' :
-                              passwordStrength <= 0.75 ? '#3b82f6' : '#22c55e'
-                        }}
-                      />
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      Password strength:{' '}
-                      <span className={
-                        passwordStrength <= 0.25 ? 'text-red-500' :
-                          passwordStrength <= 0.5 ? 'text-yellow-500' :
-                            passwordStrength <= 0.75 ? 'text-blue-500' : 'text-green-500'
-                      }>
-                        {passwordStrength <= 0.25 ? 'Weak' :
-                          passwordStrength <= 0.5 ? 'Fair' :
-                            passwordStrength <= 0.75 ? 'Good' : 'Strong'}
-                      </span>
-                    </div>
-                  </motion.div>
-                )}
+                    Full Name<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('name')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'name' ? 'focused' : 'unfocused'}
+                  />
+                </div>
+
+                <div>
+                  <motion.label
+                    htmlFor="email"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'email' ? '#d32f2f' : '#374151' }}
+                  >
+                    Email<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'email' ? 'focused' : 'unfocused'}
+                  />
+                </div>
               </div>
 
-              <div>
-                <motion.label
-                  htmlFor="cpassword"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'cpassword' ? '#d32f2f' : '#374151' }}
-                >
-                  Confirm Password
-                </motion.label>
-                <motion.input
-                  type="password"
-                  id="cpassword"
-                  name="cpassword"
-                  value={formData.cpassword}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('cpassword')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  variants={inputVariants}
-                  animate={focusedField === 'cpassword' ? 'focused' : 'unfocused'}
-                />
-                {focusedField === 'cpassword' && formData.password && formData.cpassword && (
-                  <motion.div
-                    className="mt-2 text-sm"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <motion.label
+                    htmlFor="password"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'password' ? '#d32f2f' : '#374151' }}
                   >
-                    {formData.password === formData.cpassword ? (
-                      <span className="text-green-600">✓ Passwords match</span>
-                    ) : (
-                      <span className="text-red-600">✗ Passwords do not match</span>
-                    )}
-                  </motion.div>
-                )}
+                    Password<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'password' ? 'focused' : 'unfocused'}
+                  />
+                  {passwordStrength > 0 && (
+                    <div className="mt-2">
+                      <div className="h-2 w-full bg-gray-200 rounded-full">
+                        <div
+                          className={`h-2 rounded-full ${passwordStrength <= 0.25
+                            ? 'bg-red-500' : passwordStrength <= 0.5
+                              ? 'bg-orange-500' : passwordStrength <= 0.75
+                                ? 'bg-yellow-500' : 'bg-green-500'
+                            }`}
+                          style={{ width: `${passwordStrength * 100}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-xs mt-1 text-gray-500">
+                        {passwordStrength <= 0.25
+                          ? 'Weak'
+                          : passwordStrength <= 0.5
+                            ? 'Fair'
+                            : passwordStrength <= 0.75
+                              ? 'Good'
+                              : 'Strong'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <motion.label
+                    htmlFor="cpassword"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'cpassword' ? '#d32f2f' : '#374151' }}
+                  >
+                    Confirm Password<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="password"
+                    id="cpassword"
+                    name="cpassword"
+                    value={formData.cpassword}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('cpassword')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'cpassword' ? 'focused' : 'unfocused'}
+                  />
+                </div>
               </div>
 
               <motion.button
@@ -342,7 +321,6 @@ const SignupUser = () => {
           </div>
         </motion.div>
       </motion.div>
-      <Fotor />
     </>
   );
 };

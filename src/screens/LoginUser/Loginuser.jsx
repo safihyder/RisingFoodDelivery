@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import Fotor from '../../components/Fotor/Fotor';
 import AuthService from "../../appwrite/auth"
 import { login as authLogin } from "../../store/authSlice"
 import { useDispatch } from 'react-redux';
@@ -163,78 +162,80 @@ const Loginuser = () => {
             </AnimatePresence>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <motion.label
-                  htmlFor="email"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'email' ? '#d32f2f' : '#374151' }}
-                >
-                  Email
-                  <span className="text-red-500 ml-1">*</span>
-                </motion.label>
-                <motion.input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('email')}
-                  onBlur={() => handleBlur('email')}
-                  required
-                  className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent ${touchedFields.email && !formData.email ? 'border-red-500' : ''
-                    }`}
-                  variants={inputVariants}
-                  animate={focusedField === 'email' ? 'focused' : 'unfocused'}
-                />
-                <AnimatePresence>
-                  {touchedFields.email && !formData.email && (
-                    <motion.p
-                      className="mt-1 text-sm text-red-500"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      Email is required
-                    </motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <motion.label
+                    htmlFor="email"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'email' ? '#d32f2f' : '#374151' }}
+                  >
+                    Email
+                    <span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => handleBlur('email')}
+                    required
+                    className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent ${touchedFields.email && !formData.email ? 'border-red-500' : ''
+                      }`}
+                    variants={inputVariants}
+                    animate={focusedField === 'email' ? 'focused' : 'unfocused'}
+                  />
+                  <AnimatePresence>
+                    {touchedFields.email && !formData.email && (
+                      <motion.p
+                        className="mt-1 text-sm text-red-500"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        Email is required
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
 
-              <div>
-                <motion.label
-                  htmlFor="password"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'password' ? '#d32f2f' : '#374151' }}
-                >
-                  Password
-                  <span className="text-red-500 ml-1">*</span>
-                </motion.label>
-                <motion.input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('password')}
-                  onBlur={() => handleBlur('password')}
-                  required
-                  className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent ${touchedFields.password && !formData.password ? 'border-red-500' : ''
-                    }`}
-                  variants={inputVariants}
-                  animate={focusedField === 'password' ? 'focused' : 'unfocused'}
-                />
-                <AnimatePresence>
-                  {touchedFields.password && !formData.password && (
-                    <motion.p
-                      className="mt-1 text-sm text-red-500"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                    >
-                      Password is required
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                <div>
+                  <motion.label
+                    htmlFor="password"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'password' ? '#d32f2f' : '#374151' }}
+                  >
+                    Password
+                    <span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => handleBlur('password')}
+                    required
+                    className={`mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent ${touchedFields.password && !formData.password ? 'border-red-500' : ''
+                      }`}
+                    variants={inputVariants}
+                    animate={focusedField === 'password' ? 'focused' : 'unfocused'}
+                  />
+                  <AnimatePresence>
+                    {touchedFields.password && !formData.password && (
+                      <motion.p
+                        className="mt-1 text-sm text-red-500"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                      >
+                        Password is required
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               <motion.button
@@ -284,7 +285,6 @@ const Loginuser = () => {
           </div>
         </motion.div>
       </motion.div>
-      <Fotor />
     </>
   );
 };

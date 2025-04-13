@@ -1,34 +1,36 @@
 /* ... (styles from previous example) ... */
-.error-page{
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.error-page {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 .error-buttons {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  
-  .error-buttons button,
-  .error-buttons .home-button {
-    margin: 0 10px; /* Add spacing between buttons */
-  }
-  
-  .error-buttons .home-button {
-    text-decoration: none;
-    display: inline-block;
-    background-color: #e74c3c; /* Red button */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .error-buttons .home-button:hover {
-    background-color: #c62828; /* Darker red on hover */
-  }
-  
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.error-buttons button,
+.error-buttons .home-button {
+  margin: 0 10px;
+  /* Add spacing between buttons */
+}
+
+.error-buttons .home-button {
+  text-decoration: none;
+  display: inline-block;
+  background-color: #e74c3c;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.error-buttons .home-button:hover {
+  background-color: #c62828;
+}

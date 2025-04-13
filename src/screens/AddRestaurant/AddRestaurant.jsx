@@ -298,7 +298,7 @@ const AddRestaurant = ({ restaurant }) => {
                   className="block text-sm font-medium"
                   animate={{ color: focusedField === 'name' ? '#d32f2f' : '#374151' }}
                 >
-                  Restaurant Name
+                  Restaurant Name<span className="text-red-500 ml-1">*</span>
                 </motion.label>
                 <motion.input
                   type="text"
@@ -316,28 +316,54 @@ const AddRestaurant = ({ restaurant }) => {
                 />
               </div>
 
-              <div>
-                <motion.label
-                  htmlFor="address"
-                  className="block text-sm font-medium"
-                  animate={{ color: focusedField === 'address' ? '#d32f2f' : '#374151' }}
-                >
-                  Restaurant Full Address
-                </motion.label>
-                <motion.textarea
-                  id="address"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  onFocus={() => setFocusedField('address')}
-                  onBlur={() => setFocusedField(null)}
-                  required
-                  rows={3}
-                  className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  variants={inputVariants}
-                  animate={focusedField === 'address' ? 'focused' : 'unfocused'}
-                  placeholder="Enter complete restaurant address including street, city, state, and postal code"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div>
+                  <motion.label
+                    htmlFor="address"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'address' ? '#d32f2f' : '#374151' }}
+                  >
+                    Restaurant Address<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('address')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'address' ? 'focused' : 'unfocused'}
+                    placeholder="Complete street address"
+                  />
+                </div>
+
+                <div>
+                  <motion.label
+                    htmlFor="formattedAddress"
+                    className="block text-sm font-medium"
+                    animate={{ color: focusedField === 'formattedAddress' ? '#d32f2f' : '#374151' }}
+                  >
+                    City and Zipcode<span className="text-red-500 ml-1">*</span>
+                  </motion.label>
+                  <motion.input
+                    type="text"
+                    id="formattedAddress"
+                    name="formattedAddress"
+                    value={formData.formattedAddress}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('formattedAddress')}
+                    onBlur={() => setFocusedField(null)}
+                    required
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    variants={inputVariants}
+                    animate={focusedField === 'formattedAddress' ? 'focused' : 'unfocused'}
+                    placeholder="City, State Zipcode"
+                  />
+                </div>
               </div>
 
               <div>

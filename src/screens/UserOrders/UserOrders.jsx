@@ -25,30 +25,52 @@ const UserOrders = () => {
                 if (response && response.documents.length > 0) {
                     const processedOrders = response.documents.map(order => {
                         // Parse all order data
-                        const parsedOrderItems = order.orderdata.map(orderData => JSON.parse(orderData));
+                        const parsedOrderItems = [];
 
-                        // Extract each order with its date
-                        const separatedOrders = parsedOrderItems.map(orderItem => {
-                            // Extract date from the first item in each order
-                            const orderDate = orderItem[0]?.order_date || 'Date not available';
-                            // Get order items (excluding the date object)
-                            const items = orderItem.slice(1);
+                        if (order.orderdata && Array.isArray(order.orderdata)) {
+                            // Process each order string in the array
+                            for (let i = 0; i < order.orderdata.length; i++) {
+                                try {
+                                    const orderData = JSON.parse(order.orderdata[i]);
 
-                            return {
-                                date: orderDate,
-                                items: items,
-                                total: items.reduce((sum, item) => sum + item.price, 0)
-                            };
-                        });
+                                    // Handle different data formats
+                                    if (Array.isArray(orderData)) {
+                                        // Old format: array with date object followed by items
+                                        const orderDate = orderData[0]?.order_date || 'Date not available';
+                                        const items = orderData.slice(1);
 
-                        // Sort orders by date (newest first)
-                        separatedOrders.sort((a, b) => {
-                            return new Date(b.date) - new Date(a.date);
-                        });
+                                        parsedOrderItems.push({
+                                            date: orderDate,
+                                            items: items,
+                                            total: items.reduce((sum, item) => sum + item.price, 0),
+                                            // Only the first item (latest order) gets the status, others are considered delivered
+                                            status: i === 0 ? order.deliveryStatus : 'delivered',
+                                            deliveryPartnerId: i === 0 ? order.deliveryPartnerId : 'none',
+                                            isLatest: i === 0
+                                        });
+                                    } else if (orderData.items) {
+                                        // New format: object with items, status, and deliveryPartnerId
+                                        parsedOrderItems.push({
+                                            date: orderData.date || 'Date not available',
+                                            items: orderData.items || [],
+                                            total: (orderData.items || []).reduce((sum, item) => sum + item.price, 0),
+                                            status: i === 0 ? (orderData.status || order.deliveryStatus) : 'delivered',
+                                            deliveryPartnerId: i === 0 ? (orderData.deliveryPartnerId || order.deliveryPartnerId) : 'none',
+                                            isLatest: i === 0
+                                        });
+                                    }
+                                } catch (error) {
+                                    console.error("Error parsing order data:", error);
+                                }
+                            }
+                        }
 
                         return {
                             id: order.$id,
-                            orders: separatedOrders
+                            orders: parsedOrderItems,
+                            deliveryStatus: order.deliveryStatus || 'pending',
+                            deliveryPartnerId: order.deliveryPartnerId || 'none',
+                            createdAt: new Date(order.$createdAt).toLocaleString()
                         };
                     });
 
@@ -63,6 +85,48 @@ const UserOrders = () => {
 
         fetchOrders();
     }, [userData]);
+
+    // Helper function to get delivery status text and styles
+    const getDeliveryStatusInfo = (status) => {
+        switch (status) {
+            case 'pending':
+                return {
+                    text: 'Order Received',
+                    bgColor: 'bg-blue-100',
+                    textColor: 'text-blue-800'
+                };
+            case 'ready':
+                return {
+                    text: 'Ready for Pickup',
+                    bgColor: 'bg-yellow-100',
+                    textColor: 'text-yellow-800'
+                };
+            case 'picked':
+                return {
+                    text: 'Picked Up by Delivery Partner',
+                    bgColor: 'bg-indigo-100',
+                    textColor: 'text-indigo-800'
+                };
+            case 'on-the-way':
+                return {
+                    text: 'On the Way',
+                    bgColor: 'bg-purple-100',
+                    textColor: 'text-purple-800'
+                };
+            case 'delivered':
+                return {
+                    text: 'Delivered',
+                    bgColor: 'bg-green-100',
+                    textColor: 'text-green-800'
+                };
+            default:
+                return {
+                    text: 'Processing',
+                    bgColor: 'bg-gray-100',
+                    textColor: 'text-gray-800'
+                };
+        }
+    };
 
     if (loading) {
         return <Loading />;
@@ -82,9 +146,6 @@ const UserOrders = () => {
         );
     }
 
-    // Count total orders across all documents for numbering
-    let orderCounter = 1;
-
     return (
         <motion.div
             className="min-h-screen p-4 sm:p-6 lg:p-8 mt-16 mb-8"
@@ -96,51 +157,189 @@ const UserOrders = () => {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">Your Orders</h1>
 
                 <div className="space-y-10">
-                    {orders.map((orderDoc) => (
-                        <div key={orderDoc.id} className="space-y-6">
-                            {orderDoc.orders.map((order, orderIndex) => (
+                    {orders.map((orderDoc) => {
+                        return (
+                            <div key={orderDoc.id} className="space-y-6">
                                 <motion.div
-                                    key={`${orderDoc.id}-${orderIndex}`}
                                     className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200"
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: orderIndex * 0.1, duration: 0.5 }}
+                                    transition={{ duration: 0.5 }}
                                 >
                                     <div className="bg-gradient-to-r from-orange-500 to-red-500 px-4 py-3">
                                         <div className="flex justify-between items-center">
-                                            <h2 className="text-white font-semibold">Order #{orderCounter++}</h2>
+                                            <h2 className="text-white font-semibold">Order History</h2>
                                             <span className="text-white text-sm">
-                                                {order.date}
+                                                Created: {orderDoc.createdAt}
                                             </span>
                                         </div>
                                     </div>
 
                                     <div className="p-4">
-                                        {/* Order Items */}
-                                        <div className="divide-y divide-gray-100">
-                                            {order.items.map((item, itemIndex) => (
-                                                <div key={itemIndex} className="flex justify-between items-center py-3">
-                                                    <div className="flex items-center">
-                                                        <span className="font-medium">{item.name}</span>
-                                                        <span className="ml-2 text-gray-500">x{item.qty}</span>
-                                                    </div>
-                                                    <span className="font-medium">₹{item.price.toFixed(2)}</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        {/* Order Items Section */}
+                                        {orderDoc.orders.map((order, orderIndex) => {
+                                            const statusInfo = getDeliveryStatusInfo(order.status);
 
-                                        {/* Order Total */}
-                                        <div className="mt-4 pt-4 border-t border-gray-200">
-                                            <div className="flex justify-between font-bold text-lg">
-                                                <span>Order Total:</span>
-                                                <span className="text-orange-600">₹{order.total.toFixed(2)}</span>
+                                            return (
+                                                <div key={orderIndex} className={`mb-6 p-4 rounded-lg ${order.isLatest ? 'bg-orange-50' : 'bg-white'} ${orderIndex > 0 ? 'border-t border-gray-200 pt-6' : ''}`}>
+                                                    {/* Order Header */}
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h3 className="font-semibold text-gray-800">
+                                                                Order #{orderIndex + 1}
+                                                                {order.isLatest && (
+                                                                    <span className="ml-2 px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                                                                        Latest
+                                                                    </span>
+                                                                )}
+                                                            </h3>
+                                                            <p className="text-sm text-gray-500">
+                                                                Date: {order.date}
+                                                            </p>
+                                                        </div>
+
+                                                        {/* Status Badge */}
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bgColor} ${statusInfo.textColor}`}>
+                                                            {statusInfo.text}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Show delivery partner for latest order if available */}
+                                                    {order.isLatest && order.deliveryPartnerId && order.deliveryPartnerId !== 'none' && (
+                                                        <div className="mb-4 p-3 bg-indigo-50 rounded-md">
+                                                            <div className="flex items-center">
+                                                                <svg className="h-5 w-5 text-indigo-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                                </svg>
+                                                                <span className="text-indigo-800">
+                                                                    Delivery Partner ID: {order.deliveryPartnerId}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Order Items */}
+                                                    <div className="divide-y divide-gray-100">
+                                                        {order.items.map((item, itemIndex) => (
+                                                            <div key={itemIndex} className="flex justify-between items-center py-3">
+                                                                <div className="flex items-center">
+                                                                    <span className="font-medium">{item.name}</span>
+                                                                    <span className="ml-2 text-gray-500">x{item.qty}</span>
+                                                                    {item.size && (
+                                                                        <span className="ml-2 text-gray-500">({item.size})</span>
+                                                                    )}
+                                                                </div>
+                                                                <span className="font-medium">₹{item.price.toFixed(2)}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    {/* Order Total */}
+                                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                                        <div className="flex justify-between font-bold text-lg">
+                                                            <span>Order Total:</span>
+                                                            <span className="text-orange-600">₹{order.total.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+
+                                        {/* Delivery Timeline - Only show for latest order */}
+                                        {orderDoc.orders.length > 0 && orderDoc.orders[0].isLatest && orderDoc.orders[0].status !== 'pending' && (
+                                            <div className="mt-6 pt-4 border-t border-gray-200">
+                                                <h3 className="font-medium text-gray-700 mb-3">Delivery Timeline</h3>
+                                                <div className="relative">
+                                                    <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>
+
+                                                    {/* Order Received */}
+                                                    <div className="relative flex items-center mb-4">
+                                                        <div className="absolute left-0 h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                                            <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        </div>
+                                                        <div className="ml-12">
+                                                            <span className="font-medium">Order Received</span>
+                                                            <p className="text-sm text-gray-500">Your order has been received</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Ready for Pickup */}
+                                                    <div className="relative flex items-center mb-4">
+                                                        <div className={`absolute left-0 h-8 w-8 rounded-full ${orderDoc.orders[0].status === 'pending' ? 'bg-gray-300' : 'bg-yellow-500'} flex items-center justify-center`}>
+                                                            {orderDoc.orders[0].status !== 'pending' ? (
+                                                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            ) : (
+                                                                <span className="text-white font-bold">?</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-12">
+                                                            <span className={`font-medium ${orderDoc.orders[0].status === 'pending' ? 'text-gray-400' : 'text-gray-800'}`}>Ready for Pickup</span>
+                                                            <p className="text-sm text-gray-500">Food is being prepared</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Picked Up */}
+                                                    <div className="relative flex items-center mb-4">
+                                                        <div className={`absolute left-0 h-8 w-8 rounded-full ${orderDoc.orders[0].status === 'pending' || orderDoc.orders[0].status === 'ready' ? 'bg-gray-300' : 'bg-indigo-500'} flex items-center justify-center`}>
+                                                            {orderDoc.orders[0].status !== 'pending' && orderDoc.orders[0].status !== 'ready' ? (
+                                                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            ) : (
+                                                                <span className="text-white font-bold">?</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-12">
+                                                            <span className={`font-medium ${orderDoc.orders[0].status === 'pending' || orderDoc.orders[0].status === 'ready' ? 'text-gray-400' : 'text-gray-800'}`}>Picked Up</span>
+                                                            <p className="text-sm text-gray-500">Order picked up by delivery partner</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* On the Way */}
+                                                    <div className="relative flex items-center mb-4">
+                                                        <div className={`absolute left-0 h-8 w-8 rounded-full ${orderDoc.orders[0].status === 'pending' || orderDoc.orders[0].status === 'ready' || orderDoc.orders[0].status === 'picked' ? 'bg-gray-300' : 'bg-purple-500'} flex items-center justify-center`}>
+                                                            {orderDoc.orders[0].status === 'on-the-way' || orderDoc.orders[0].status === 'delivered' ? (
+                                                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            ) : (
+                                                                <span className="text-white font-bold">?</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-12">
+                                                            <span className={`font-medium ${orderDoc.orders[0].status === 'pending' || orderDoc.orders[0].status === 'ready' || orderDoc.orders[0].status === 'picked' ? 'text-gray-400' : 'text-gray-800'}`}>On the Way</span>
+                                                            <p className="text-sm text-gray-500">Order is on the way to your location</p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Delivered */}
+                                                    <div className="relative flex items-center">
+                                                        <div className={`absolute left-0 h-8 w-8 rounded-full ${orderDoc.orders[0].status === 'delivered' ? 'bg-green-500' : 'bg-gray-300'} flex items-center justify-center`}>
+                                                            {orderDoc.orders[0].status === 'delivered' ? (
+                                                                <svg className="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            ) : (
+                                                                <span className="text-white font-bold">?</span>
+                                                            )}
+                                                        </div>
+                                                        <div className="ml-12">
+                                                            <span className={`font-medium ${orderDoc.orders[0].status === 'delivered' ? 'text-gray-800' : 'text-gray-400'}`}>Delivered</span>
+                                                            <p className="text-sm text-gray-500">Order has been delivered</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </motion.div>
-                            ))}
-                        </div>
-                    ))}
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </motion.div>

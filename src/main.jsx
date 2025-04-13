@@ -5,6 +5,7 @@ import { Provider } from 'react-redux'
 import store from './store/store.js'
 import './index.css'
 import { RouterProvider, createBrowserRouter, ScrollRestoration } from "react-router-dom"
+import { Toaster } from 'react-hot-toast'
 import Home from './screens/Home/Home';
 import Loginuser from './screens/LoginUser/Loginuser';
 import SignupUser from './screens/SignUpUser/SignupUser';
@@ -27,7 +28,9 @@ import Items from './screens/Items/Items.jsx'
 import Cookies from './screens/Cookies/Cookies.jsx'
 import UserOrders from './screens/UserOrders/UserOrders.jsx'
 import DeliveryPartnerRegistration from './screens/DeliveryPartnerRegistration/DeliveryPartnerRegistration.jsx'
+import DeliveryPartnerDashboard from './screens/DeliveryPartnerDashboard/DeliveryPartnerDashboard.jsx'
 import RestaurantOrders from './screens/RestaurantOrders/RestaurantOrders.jsx'
+import AdminDashboard from './screens/Admin/AdminDashboard.jsx'
 // import { registerServiceWorker } from './utils/serviceWorkerRegistration';
 
 // Register the service worker
@@ -145,8 +148,16 @@ const router = createBrowserRouter([
         element: <DeliveryPartnerRegistration />
       },
       {
+        path: '/delivery-partner-dashboard',
+        element: <DeliveryPartnerDashboard />
+      },
+      {
         path: '/restaurant-orders/:slug',
         element: <RestaurantOrders />
+      },
+      {
+        path: '/admin',
+        element: <AdminDashboard />
       }
     ],
   },
@@ -155,6 +166,7 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
+      <Toaster position="top-center" reverseOrder={false} />
       <RouterProvider router={router}></RouterProvider>
     </Provider>
   </React.StrictMode>,
