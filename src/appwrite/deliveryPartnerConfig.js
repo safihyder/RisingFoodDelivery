@@ -128,10 +128,10 @@ export class DeliveryPartnerService {
     }
 
     // File upload service for ID proof and profile photo
-    async uploadFile(file, bucketId = conf.appwriteDeliveryPartnerBucketId) {
+    async uploadFile(file) {
         try {
             return await this.bucket.createFile(
-                bucketId,
+                conf.appwriteDeliveryPartnerBucketId,
                 ID.unique(),
                 file
             );
@@ -141,10 +141,10 @@ export class DeliveryPartnerService {
         }
     }
 
-    async deleteFile(fileId, bucketId = conf.appwriteDeliveryPartnerBucketId) {
+    async deleteFile(fileId) {
         try {
             await this.bucket.deleteFile(
-                bucketId,
+                conf.appwriteDeliveryPartnerBucketId,
                 fileId
             );
             return true;
@@ -154,9 +154,9 @@ export class DeliveryPartnerService {
         }
     }
 
-    getFilePreview(fileId, bucketId = conf.appwriteDeliveryPartnerBucketId) {
+    getFilePreview(fileId) {
         return this.bucket.getFilePreview(
-            bucketId,
+            conf.appwriteDeliveryPartnerBucketId,
             fileId
         );
     }
