@@ -9,11 +9,13 @@ import axios from "axios";
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const [dbData, setDbData] = useState([]);
+  const [dbData, setDbData] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [deleteAnimation, setDeleteAnimation] = useState({ index: null, animate: false });
+  const [pendingOrders, setPendingOrders] = useState([]);
+  const [isCheckingOrders, setIsCheckingOrders] = useState(true);
 
   const foodData = useSelector(state => state.order.userorder);
   const userEmail = useSelector(state => state.auth.userData.email);
@@ -21,8 +23,34 @@ const Cart = () => {
   const totalPrice = foodData.reduce((total, food) => total + food.price, 0);
 
   useEffect(() => {
-    AppwriteOrderService.getOrders([Query.equal("email", userEmail)]).then((data) => {
-      setDbData(data?.documents[0]);
+    if (!userEmail) {
+      setIsCheckingOrders(false);
+      return;
+    }
+
+    setIsCheckingOrders(true);
+    // Check for any orders that aren't delivered yet
+    AppwriteOrderService.getOrders([
+      Query.equal("email", userEmail),
+      Query.notEqual("deliveryStatus", "delivered")
+    ]).then((data) => {
+      if (data && data.documents && data.documents.length > 0) {
+        setPendingOrders(data.documents);
+        // Still set the first order as dbData for potential updates
+        setDbData(data.documents[0]);
+      } else {
+        setPendingOrders([]);
+        // Check if user has any orders at all (for potential updates)
+        return AppwriteOrderService.getOrders([Query.equal("email", userEmail)]);
+      }
+    }).then((allData) => {
+      if (allData && allData.documents && allData.documents.length > 0) {
+        setDbData(allData.documents[0]);
+      }
+      setIsCheckingOrders(false);
+    }).catch(error => {
+      console.error("Error checking orders:", error);
+      setIsCheckingOrders(false);
     });
   }, [userEmail]);
 
@@ -38,6 +66,25 @@ const Cart = () => {
 
   const handleCheckOut = async (e) => {
     e.preventDefault();
+
+    // Recheck for pending orders before proceeding
+    try {
+      const pendingOrdersCheck = await AppwriteOrderService.getOrders([
+        Query.equal("email", userEmail),
+        Query.notEqual("deliveryStatus", "delivered")
+      ]);
+
+      if (pendingOrdersCheck && pendingOrdersCheck.documents && pendingOrdersCheck.documents.length > 0) {
+        // Don't allow checkout if there are pending orders
+        alert("You have pending orders that haven't been delivered yet. Please wait until your current orders are delivered before placing a new one.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking pending orders before checkout:", error);
+      alert("There was an error checking your order status. Please try again.");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -170,6 +217,61 @@ const Cart = () => {
       transition: { duration: 0.3 }
     }
   };
+
+  // Show loading state while checking orders
+  if (isCheckingOrders) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mr-4"></div>
+        <p className="text-gray-300">Checking your order status...</p>
+      </div>
+    );
+  }
+
+  // If there are pending orders, show a warning and don't allow new orders
+  if (pendingOrders.length > 0 && foodData.length > 0) {
+    return (
+      <motion.div
+        className="flex flex-col items-center justify-center min-h-[60vh] p-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="text-center max-w-md"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <div className="mb-6 text-yellow-500">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">Active Order in Progress</h2>
+          <p className="text-gray-300 mb-6">You have {pendingOrders.length > 1 ? `${pendingOrders.length} orders` : 'an order'} that {pendingOrders.length > 1 ? 'are' : 'is'} currently being processed. Please wait for your current {pendingOrders.length > 1 ? 'orders' : 'order'} to be delivered before placing a new one.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.button
+              className="px-6 py-3 bg-orange-500 text-white rounded-md font-medium hover:bg-orange-600 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => window.location.href = '/user-orders'}
+            >
+              View My Orders
+            </motion.button>
+            <motion.button
+              className="px-6 py-3 bg-gray-700 text-white rounded-md font-medium hover:bg-gray-600 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => dispatch(dropOrders())}
+            >
+              Clear Cart
+            </motion.button>
+          </div>
+        </motion.div>
+      </motion.div>
+    );
+  }
 
   if (foodData.length === 0) {
     return (
