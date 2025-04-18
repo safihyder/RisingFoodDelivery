@@ -1,8 +1,4 @@
-import React from 'react'
 import ReactDom from 'react-dom'
-import AuthService from "./appwrite/auth"
-import { useDispatch } from 'react-redux'
-import { login, logout } from './store/authSlice'
 
 const MODAL_STYLES = {
   position: 'fixed',
@@ -15,18 +11,7 @@ const MODAL_STYLES = {
   height: '95%',
   maxWidth: '1200px',
   maxHeight: '800px',
-  '@media (min-width: 640px)': {
-    width: '85%',
-    height: '85%'
-  },
-  '@media (min-width: 768px)': {
-    width: '80%',
-    height: '80%'
-  },
-  '@media (min-width: 1024px)': {
-    width: '70%',
-    height: '70%'
-  }
+  overflow: 'hidden'
 }
 
 const OVERLAY_STYLES = {
@@ -40,30 +25,22 @@ const OVERLAY_STYLES = {
 }
 
 export default function Modal({ children, onClose }) {
-  // const [loading, setLoading] = React.useState(true)
-  // const dispatch = useDispatch()
-  // React.useEffect(() => {
-  //   AuthService.getCurrentUser()
-  //     .then((userData) => {
-  //       if (userData) {
-  //         dispatch(login({ userData }))
-  //       } else {
-  //         dispatch(logout())
-  //       }
-  //     }).finally(() => setLoading(false))
-
-  // }, [])
   return ReactDom.createPortal(
     <>
       <div style={OVERLAY_STYLES} />
-      <div style={MODAL_STYLES}>
-        <button 
-          className="absolute top-4 right-4 bg-red-600 text-white text-xl w-8 h-8 rounded hover:bg-red-700 transition-colors"
+      <div
+        style={MODAL_STYLES}
+        className="rounded-lg"
+      >
+        <button
+          className="absolute top-4 right-4 bg-red-600 text-white text-xl w-8 h-8 rounded hover:bg-red-700 transition-colors z-50"
           onClick={onClose}
         >
           X
         </button>
-        {children}
+        <div className="h-full w-full overflow-auto p-8 pt-16">
+          {children}
+        </div>
       </div>
     </>,
     document.getElementById('cart-root')

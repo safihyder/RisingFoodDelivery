@@ -9,5 +9,7 @@ const conf = {
     appwriteResBucketId: String(import.meta.env.VITE_APPWRITE_RES_BUCKET_ID),
     appwriteItemBucketId: String(import.meta.env.VITE_APPWRITE_ITEM_BUCKET_ID),
     appwriteDeliveryPartnerBucketId: String(import.meta.env.VITE_APPWRITE_DELIVERY_PARTNER_BUCKET_ID),
+    twilioAccountSid: String(import.meta.env.VITE_TWILIO_ACCID),
+    twilioAuthToken: String(import.meta.env.VITE_TWILIO_AUTH_TOKEN)
 }
 export default conf

@@ -6,6 +6,8 @@ import AppwriteOrderService from '../../appwrite/orderconfig';
 import { Query } from "appwrite";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import toast from 'react-hot-toast';
+import conf from '../../conf/conf';
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -64,6 +66,28 @@ const Cart = () => {
     }, 300);
   };
 
+  // Function to send SMS notification
+  const sendSmsNotification = async (orderId, amount) => {
+    try {
+      // Use Appwrite function to send SMS - this is safer than direct Twilio access
+
+      let message = `Order placed!, Order ID: ${orderId}, Amount: ₹${amount}`
+      const response = await axios.post('https://67b5a11ac39fc1a21470.appwrite.global/send-sms', {
+        body: message,
+        to: "+917889365127"
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('SMS notification sent:', response.data);
+    } catch (error) {
+      console.error('Error sending SMS notification:', error);
+      // Silent failure - don't block the order confirmation if SMS fails
+    }
+  };
+
   const handleCheckOut = async (e) => {
     e.preventDefault();
 
@@ -76,12 +100,12 @@ const Cart = () => {
 
       if (pendingOrdersCheck && pendingOrdersCheck.documents && pendingOrdersCheck.documents.length > 0) {
         // Don't allow checkout if there are pending orders
-        alert("You have pending orders that haven't been delivered yet. Please wait until your current orders are delivered before placing a new one.");
+        toast.error("You have pending orders that haven't been delivered yet. Please wait until your current orders are delivered before placing a new one.");
         return;
       }
     } catch (error) {
       console.error("Error checking pending orders before checkout:", error);
-      alert("There was an error checking your order status. Please try again.");
+      toast.error("There was an error checking your order status. Please try again.");
       return;
     }
 
@@ -144,6 +168,23 @@ const Cart = () => {
                     dispatch(dropOrders());
                     setShowConfirmation(true);
                     setIsProcessing(false);
+
+                    // Send SMS notification
+                    await sendSmsNotification(
+                      updatedData.$id.substring(0, 8),
+                      (totalPrice + Math.round(totalPrice * 0.05))
+                    );
+
+                    // Show toast notification for successful order
+                    toast.success('Order placed successfully! 🍔', {
+                      duration: 4000,
+                      icon: '🎉',
+                      style: {
+                        borderRadius: '10px',
+                        background: '#333',
+                        color: '#fff',
+                      },
+                    });
                   } else {
                     throw new Error("Failed to update order");
                   }
@@ -157,6 +198,23 @@ const Cart = () => {
                     dispatch(dropOrders());
                     setShowConfirmation(true);
                     setIsProcessing(false);
+
+                    // Send SMS notification
+                    await sendSmsNotification(
+                      dbOrder.$id.substring(0, 8),
+                      (totalPrice + Math.round(totalPrice * 0.05))
+                    );
+
+                    // Show toast notification for successful order
+                    toast.success('Order placed successfully! 🍔', {
+                      duration: 4000,
+                      icon: '🎉',
+                      style: {
+                        borderRadius: '10px',
+                        background: '#333',
+                        color: '#fff',
+                      },
+                    });
                   } else {
                     throw new Error("Failed to create order");
                   }
@@ -164,14 +222,17 @@ const Cart = () => {
               } catch (orderError) {
                 console.error("Error placing order:", orderError);
                 setIsProcessing(false);
+                toast.error("Failed to place order. Please try again.");
               }
             } else {
               console.error("Payment verification failed");
               setIsProcessing(false);
+              toast.error("Payment verification failed. Please try again.");
             }
           } catch (error) {
             console.error("Payment verification error:", error);
             setIsProcessing(false);
+            toast.error("Payment verification error. Please try again.");
           }
         }
       };
@@ -182,7 +243,7 @@ const Cart = () => {
       razorpay.on('payment.failed', (response) => {
         console.error("Payment failed:", response.error);
         setIsProcessing(false);
-        // You might want to show an error message to the user here
+        toast.error(`Payment failed: ${response.error.description}`);
       });
 
       razorpay.on('modal.closed', function () {
@@ -192,7 +253,7 @@ const Cart = () => {
     } catch (error) {
       console.error("Checkout error:", error);
       setIsProcessing(false);
-      // You might want to show an error message to the user here
+      toast.error("Failed to process checkout. Please try again.");
     }
   };
 
