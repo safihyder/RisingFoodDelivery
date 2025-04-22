@@ -10,7 +10,7 @@ import { logout } from '../../store/authSlice';
 import AppwriteResService from '../../appwrite/config';
 import AppwriteOrderService from '../../appwrite/orderconfig';
 import deliveryPartnerService from '../../appwrite/deliveryPartnerConfig';
-import axios from 'axios';
+
 const Navbar = () => {
   const foodItems = useSelector(state => state.order.userorder)
   const [restaurant, setrestaurant] = useState(null)
@@ -18,37 +18,8 @@ const Navbar = () => {
   const [isAdmin, setIsAdmin] = useState(false)
   const [isDeliveryPartner, setIsDeliveryPartner] = useState(false)
   const userData = useSelector(state => state.auth.userData)
-  const [deliveryStatus, setDeliveryStatus] = useState({
-    checking: true,
-    available: false,
-    message: "Checking delivery availability..."
-  });
 
   useEffect(() => {
-    // Check delivery availability based on geolocation
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          console.log(position.coords.latitude, position.coords.longitude)
-          checkDeliveryAvailability(position.coords.latitude, position.coords.longitude);
-        },
-        (error) => {
-          console.error("Geolocation error:", error);
-          setDeliveryStatus({
-            checking: false,
-            available: false,
-            message: "Unable to determine your location."
-          });
-        }
-      );
-    } else {
-      setDeliveryStatus({
-        checking: false,
-        available: false,
-        message: "Geolocation is not supported by your browser."
-      });
-    }
-
     AppwriteResService.getRestaurants([Query.contains('userId', userData?.$id)])
       .then((restData) => {
         if (restData) {
@@ -96,35 +67,6 @@ const Navbar = () => {
     }
   }, [userData, restaurant])
 
-  const checkDeliveryAvailability = async (latitude, longitude) => {
-    try {
-      const response = await axios.post('https://680371d0883fafd90d19.fra.appwrite.run/check-delivery', {
-        lat: latitude,
-        lng: longitude
-      });
-      setDeliveryStatus({
-        checking: false,
-        available: response.data.allowed,
-        message: response.data.message
-      });
-    } catch (error) {
-      console.error("Error checking delivery availability:", error);
-
-      let errorMessage = "Error checking delivery availability.";
-      if (error.code === 'ERR_NETWORK') {
-        errorMessage = "Unable to connect to delivery service. Please check your internet connection.";
-      } else if (error.response) {
-        errorMessage = `Server error: ${error.response.status}`;
-      }
-
-      setDeliveryStatus({
-        checking: false,
-        available: false,
-        message: errorMessage
-      });
-    }
-  };
-
   const authStatus = useSelector((state) => state.auth.status)
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
@@ -144,27 +86,6 @@ const Navbar = () => {
             <img src="/Images/logo.png" alt="Food Delivery Logo" className="h-10 sm:h-12 w-auto" />
           </div>
         </Link>
-
-        {/* Delivery Status Indicator */}
-        <div className={`hidden md:flex items-center px-3 py-1 rounded-full text-sm font-medium ${deliveryStatus.checking
-          ? 'bg-gray-200 text-gray-800'
-          : deliveryStatus.available
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
-          }`}>
-          {deliveryStatus.checking ? (
-            <div className="flex items-center">
-              <div className="animate-spin mr-2 h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
-              Checking delivery...
-            </div>
-          ) : (
-            <>
-              <span className={`inline-block w-2 h-2 rounded-full mr-2 ${deliveryStatus.available ? 'bg-green-500' : 'bg-red-500'
-                }`}></span>
-              {deliveryStatus.message}
-            </>
-          )}
-        </div>
 
         {/* Desktop Navigation */}
         <div className="hidden md:block">
@@ -311,32 +232,11 @@ const Navbar = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col p-6 pt-20">
-                {/* Mobile Delivery Status */}
-                <div className={`mb-6 px-3 py-2 rounded-lg text-sm font-medium ${deliveryStatus.checking
-                  ? 'bg-white/20 text-white'
-                  : deliveryStatus.available
-                    ? 'bg-green-500/30 text-white'
-                    : 'bg-red-500/30 text-white'
-                  }`}>
-                  {deliveryStatus.checking ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                      Checking delivery...
-                    </div>
-                  ) : (
-                    <>
-                      <span className={`inline-block w-2 h-2 rounded-full mr-2 ${deliveryStatus.available ? 'bg-green-300' : 'bg-red-300'
-                        }`}></span>
-                      {deliveryStatus.message}
-                    </>
-                  )}
-                </div>
-
                 <ul className="flex flex-col space-y-6 font-medium text-white">
                   {restaurant ? (
                     <li>
                       <Link
-                        to={`/restaurant/${restaurant?.$id}`}
+                        to={`/restaurants/${restaurant?.$id}`}
                         className="block py-2 hover:text-yellow-300 transition-colors"
                         onClick={() => setIsOpen(false)}
                       >

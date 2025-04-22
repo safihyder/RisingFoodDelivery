@@ -1,6 +1,220 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+
+// Import Capacitor Geolocation conditionally
+let Geolocation = null;
+if (window.Capacitor && window.Capacitor.isNativePlatform) {
+    // Use a proper function instead of top-level await
+    const loadGeolocationPlugin = () => {
+        import('@capacitor/geolocation')
+            .then(module => {
+                Geolocation = module.Geolocation;
+                console.log('Geolocation plugin loaded');
+            })
+            .catch(e => {
+                console.log('Capacitor Geolocation not available:', e);
+            });
+    };
+
+    loadGeolocationPlugin();
+}
 
 const Hero = () => {
+    const [deliveryStatus, setDeliveryStatus] = useState({
+        checking: false,
+        available: true,
+        message: "Great news! Delivery service is available in your area.",
+        locationName: "Your Area"
+    });
+    const [animateLocation, setAnimateLocation] = useState(false);
+
+    useEffect(() => {
+        // Only check delivery location if not already set as available
+        if (!deliveryStatus.available) {
+            checkDeliveryLocation();
+        }
+
+        // Animate location ping every 3 seconds
+        const animationInterval = setInterval(() => {
+            setAnimateLocation(true);
+            setTimeout(() => setAnimateLocation(false), 1000);
+        }, 3000);
+
+        return () => clearInterval(animationInterval);
+    }, []);
+
+    const checkDeliveryLocation = async () => {
+        // Check if running on a Capacitor native platform
+        const isNativePlatform = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        console.log('Is native platform:', isNativePlatform);
+        console.log('Geolocation plugin available:', !!Geolocation);
+
+        try {
+            let latitude, longitude;
+
+            if (isNativePlatform && Geolocation) {
+                // Using Capacitor Geolocation for native platforms
+                console.log('Attempting to use Capacitor Geolocation');
+
+                try {
+                    const permissionStatus = await Geolocation.checkPermissions();
+                    console.log('Permission status:', permissionStatus);
+
+                    if (permissionStatus.location !== 'granted') {
+                        console.log('Requesting location permission');
+                        const requestPermission = await Geolocation.requestPermissions();
+                        console.log('Request permission result:', requestPermission);
+
+                        if (requestPermission.location !== 'granted') {
+                            console.log('Permission denied');
+                            setDeliveryStatus({
+                                ...deliveryStatus,
+                                checking: false,
+                                available: false,
+                                message: "Location permission needed"
+                            });
+                            return;
+                        }
+                    }
+
+                    console.log('Getting current position');
+                    const position = await Geolocation.getCurrentPosition({
+                        enableHighAccuracy: true,
+                        timeout: 10000
+                    });
+                    console.log('Position obtained:', position);
+
+                    latitude = position.coords.latitude;
+                    longitude = position.coords.longitude;
+
+                    console.log(`Location: ${latitude}, ${longitude}`);
+
+                    // Process the location data directly
+                    if (latitude && longitude) {
+                        await processLocationData(latitude, longitude);
+                    }
+                } catch (capacitorError) {
+                    console.error('Capacitor geolocation error:', capacitorError);
+                    throw capacitorError; // rethrow to be caught by the outer try/catch
+                }
+            } else {
+                // Using browser geolocation for web
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            latitude = position.coords.latitude;
+                            longitude = position.coords.longitude;
+                            processLocationData(latitude, longitude);
+                        },
+                        (error) => {
+                            console.error("Geolocation error:", error);
+                            setDeliveryStatus({
+                                ...deliveryStatus,
+                                checking: false,
+                                available: false,
+                                message: "Location unavailable"
+                            });
+                        }
+                    );
+                } else {
+                    setDeliveryStatus({
+                        ...deliveryStatus,
+                        checking: false,
+                        available: false,
+                        message: "Location not supported"
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error in location detection:", error);
+
+            // Fallback to browser geolocation if Capacitor fails
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        processLocationData(position.coords.latitude, position.coords.longitude);
+                    },
+                    (error) => {
+                        console.error("Geolocation fallback error:", error);
+                        setDeliveryStatus({
+                            ...deliveryStatus,
+                            checking: false,
+                            available: false,
+                            message: "Unable to determine location"
+                        });
+                    }
+                );
+            } else {
+                setDeliveryStatus({
+                    ...deliveryStatus,
+                    checking: false,
+                    available: false,
+                    message: "Location services unavailable"
+                });
+            }
+        }
+    };
+
+    const processLocationData = async (latitude, longitude) => {
+        // Try to get address from coordinates for better UX
+        try {
+            const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+            const geoData = await geoResponse.json();
+
+            let locationName = "";
+            if (geoData && geoData.address) {
+                const address = geoData.address;
+                locationName = address.city || address.town || address.village || address.suburb || "";
+            }
+
+            setDeliveryStatus(prev => ({
+                ...prev,
+                locationName
+            }));
+        } catch (error) {
+            console.error("Error fetching location name:", error);
+        }
+
+        checkDeliveryAvailability(latitude, longitude);
+    };
+
+    const checkDeliveryAvailability = async (latitude, longitude) => {
+        try {
+            const response = await axios.post('https://680371d0883fafd90d19.fra.appwrite.run/check-delivery', {
+                lat: latitude,
+                lng: longitude
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            setDeliveryStatus({
+                ...deliveryStatus,
+                checking: false,
+                available: response.data.allowed,
+                message: response.data.message
+            });
+        } catch (error) {
+            console.error("Error checking delivery availability:", error);
+
+            let errorMessage = "Delivery check unavailable";
+            if (error.code === 'ERR_NETWORK') {
+                errorMessage = "Connection issue";
+            } else if (error.response) {
+                errorMessage = `Service error`;
+            }
+
+            setDeliveryStatus({
+                ...deliveryStatus,
+                checking: false,
+                available: false,
+                message: errorMessage
+            });
+        }
+    };
+
     return (
         <div className="hero-container bg-gradient-to-r from-red-600 via-red-500 to-orange-500 py-16 md:py-24 relative overflow-hidden">
             {/* Decorative elements */}
@@ -22,6 +236,7 @@ const Hero = () => {
                             Streamline your restaurant operations with our enterprise-grade food delivery platform.
                             Increase revenue, reduce costs, and delight your customers.
                         </p>
+
                         <div className="flex flex-wrap gap-4">
                             <Link
                                 to="/restaurants"
@@ -95,6 +310,36 @@ const Hero = () => {
 
                                     {/* App Content */}
                                     <div className="p-4">
+                                        {/* Delivery Status Banner - NEW HIGHLIGHTED SECTION */}
+                                        <div className={`mb-4 rounded-lg p-3 animate-fadeIn flex items-center gap-3 shadow-md border border-green-200 bg-green-50`}>
+                                            <div className="relative flex-shrink-0">
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <div className={`absolute top-0 left-0 w-8 h-8 rounded-full bg-green-500 animate-ping ${animateLocation ? 'opacity-75' : 'opacity-0'}`}></div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-base text-green-800">
+                                                    We Deliver to Your Area!
+                                                </h4>
+                                                <p className="text-sm text-green-700">
+                                                    {deliveryStatus.message}
+                                                </p>
+                                                {deliveryStatus.locationName && (
+                                                    <div className="flex items-center mt-1">
+                                                        <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
+                                                            Located in {deliveryStatus.locationName}
+                                                        </span>
+                                                        <span className="ml-2 text-xs text-green-600">
+                                                            • Fast Delivery Available
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
                                         {/* Location */}
                                         <div className="flex items-center gap-1 mb-4">
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">

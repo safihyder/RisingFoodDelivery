@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Rising Food Delivery</string>
+    <string name="title_activity_main">Rising Food Delivery</string>
+    <string name="package_name">com.risingfooddelivery.app</string>
+    <string name="custom_url_scheme">com.risingfooddelivery.app</string>
+</resources>

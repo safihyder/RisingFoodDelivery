@@ -11,6 +11,16 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/cli": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
+    "@capacitor/geolocation": "^7.1.1",
+    "@capacitor/haptics": "^7.0.1",
+    "@capacitor/ios": "^7.2.0",
+    "@capacitor/keyboard": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.19",
@@ -49,7 +59,9 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.47",
+    "prompts": "^2.4.2",
     "tailwindcss": "^3.4.14",
+    "typescript": "^5.8.3",
     "vite": "^5.2.0"
   }
 }

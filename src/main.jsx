@@ -31,10 +31,83 @@ import DeliveryPartnerRegistration from './screens/DeliveryPartnerRegistration/D
 import DeliveryPartnerDashboard from './screens/DeliveryPartnerDashboard/DeliveryPartnerDashboard.jsx'
 import RestaurantOrders from './screens/RestaurantOrders/RestaurantOrders.jsx'
 import AdminDashboard from './screens/Admin/AdminDashboard.jsx'
-// import { registerServiceWorker } from './utils/serviceWorkerRegistration';
+
+// Conditionally import Capacitor plugins
+let CapacitorPlugins = {
+  SplashScreen: null,
+  App: null,
+  StatusBar: null,
+  Geolocation: null
+};
+
+// Only initialize Capacitor on native platforms
+if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+  // Instead of using top-level await, we'll create and immediately invoke an async function
+  const loadCapacitorPlugins = async () => {
+    try {
+      CapacitorPlugins = {
+        SplashScreen: (await import('@capacitor/splash-screen')).SplashScreen,
+        App: (await import('@capacitor/app')).App,
+        StatusBar: (await import('@capacitor/status-bar')).StatusBar,
+        Geolocation: (await import('@capacitor/geolocation')).Geolocation
+      };
+
+      console.log('Capacitor plugins loaded for native platform');
+
+      // Initialize native settings
+      const initializeCapacitor = async () => {
+        try {
+          // Request geolocation permissions early
+          await CapacitorPlugins.Geolocation.requestPermissions();
+
+          // Configure status bar to be visible with light content
+          if (CapacitorPlugins.StatusBar) {
+            // Set status bar style (light text for dark backgrounds, dark text for light backgrounds)
+            await CapacitorPlugins.StatusBar.setStyle({ style: 'light' });
+
+            // Make status bar background transparent or a specific color
+            if (CapacitorPlugins.StatusBar.setBackgroundColor) {
+              await CapacitorPlugins.StatusBar.setBackgroundColor({ color: '#ffffff' });
+            }
+
+            // Ensure status bar is visible and doesn't overlay the WebView
+            await CapacitorPlugins.StatusBar.setOverlaysWebView({ overlay: false });
+            await CapacitorPlugins.StatusBar.show();
+          }
+
+          // Hide splash screen with fade
+          await CapacitorPlugins.SplashScreen.hide({
+            fadeOutDuration: 500
+          });
+
+          // Handle Android back button
+          CapacitorPlugins.App.addListener('backButton', ({ canGoBack }) => {
+            if (!canGoBack) {
+              CapacitorPlugins.App.exitApp();
+            } else {
+              window.history.back();
+            }
+          });
+
+          console.log('Capacitor initialized successfully');
+        } catch (error) {
+          console.error('Error initializing Capacitor:', error);
+        }
+      };
+
+      initializeCapacitor();
+    } catch (error) {
+      console.error('Failed to load Capacitor plugins:', error);
+    }
+  };
+
+  // Execute the async function
+  loadCapacitorPlugins();
+}
 
 // Register the service worker
 // registerServiceWorker();
+
 const router = createBrowserRouter([
   {
     path: "/",
