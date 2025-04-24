@@ -31,6 +31,7 @@ import DeliveryPartnerRegistration from './screens/DeliveryPartnerRegistration/D
 import DeliveryPartnerDashboard from './screens/DeliveryPartnerDashboard/DeliveryPartnerDashboard.jsx'
 import RestaurantOrders from './screens/RestaurantOrders/RestaurantOrders.jsx'
 import AdminDashboard from './screens/Admin/AdminDashboard.jsx'
+import { checkAndRequestLocationPermissions } from './utils/PermissionManager'
 
 // Conditionally import Capacitor plugins
 let CapacitorPlugins = {
@@ -57,8 +58,8 @@ if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.is
       // Initialize native settings
       const initializeCapacitor = async () => {
         try {
-          // Request geolocation permissions early
-          await CapacitorPlugins.Geolocation.requestPermissions();
+          // Request geolocation permissions early using our utility
+          await checkAndRequestLocationPermissions();
 
           // Configure status bar to be visible with light content
           if (CapacitorPlugins.StatusBar) {

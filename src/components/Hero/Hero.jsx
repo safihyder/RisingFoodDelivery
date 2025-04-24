@@ -1,39 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-
-// Import Capacitor Geolocation conditionally
-let Geolocation = null;
-if (window.Capacitor && window.Capacitor.isNativePlatform) {
-    // Use a proper function instead of top-level await
-    const loadGeolocationPlugin = () => {
-        import('@capacitor/geolocation')
-            .then(module => {
-                Geolocation = module.Geolocation;
-                console.log('Geolocation plugin loaded');
-            })
-            .catch(e => {
-                console.log('Capacitor Geolocation not available:', e);
-            });
-    };
-
-    loadGeolocationPlugin();
-}
+import { Capacitor } from '@capacitor/core';
+import { getCurrentPosition, forceLocationPermissionPrompt } from '../../utils/PermissionManager';
 
 const Hero = () => {
     const [deliveryStatus, setDeliveryStatus] = useState({
-        checking: false,
-        available: true,
-        message: "Great news! Delivery service is available in your area.",
-        locationName: "Your Area"
+        checking: true,
+        available: false,
+        message: "Checking delivery availability...",
+        locationName: ""
     });
     const [animateLocation, setAnimateLocation] = useState(false);
 
     useEffect(() => {
-        // Only check delivery location if not already set as available
-        if (!deliveryStatus.available) {
-            checkDeliveryLocation();
-        }
+        // Check delivery location on component mount
+        checkDeliveryLocation();
 
         // Animate location ping every 3 seconds
         const animationInterval = setInterval(() => {
@@ -46,66 +28,41 @@ const Hero = () => {
 
     const checkDeliveryLocation = async () => {
         // Check if running on a Capacitor native platform
-        const isNativePlatform = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        const isNativePlatform = Capacitor.isNativePlatform();
         console.log('Is native platform:', isNativePlatform);
-        console.log('Geolocation plugin available:', !!Geolocation);
 
         try {
-            let latitude, longitude;
+            setDeliveryStatus(prev => ({
+                ...prev,
+                checking: true
+            }));
 
-            if (isNativePlatform && Geolocation) {
-                // Using Capacitor Geolocation for native platforms
+            let position;
+
+            if (isNativePlatform) {
+                // Use our new utility function to get position on native platforms
                 console.log('Attempting to use Capacitor Geolocation');
+                position = await getCurrentPosition();
 
-                try {
-                    const permissionStatus = await Geolocation.checkPermissions();
-                    console.log('Permission status:', permissionStatus);
-
-                    if (permissionStatus.location !== 'granted') {
-                        console.log('Requesting location permission');
-                        const requestPermission = await Geolocation.requestPermissions();
-                        console.log('Request permission result:', requestPermission);
-
-                        if (requestPermission.location !== 'granted') {
-                            console.log('Permission denied');
-                            setDeliveryStatus({
-                                ...deliveryStatus,
-                                checking: false,
-                                available: false,
-                                message: "Location permission needed"
-                            });
-                            return;
-                        }
-                    }
-
-                    console.log('Getting current position');
-                    const position = await Geolocation.getCurrentPosition({
-                        enableHighAccuracy: true,
-                        timeout: 10000
+                if (!position) {
+                    console.log('Position not available');
+                    setDeliveryStatus({
+                        ...deliveryStatus,
+                        checking: false,
+                        available: false,
+                        message: "Location permission needed"
                     });
-                    console.log('Position obtained:', position);
-
-                    latitude = position.coords.latitude;
-                    longitude = position.coords.longitude;
-
-                    console.log(`Location: ${latitude}, ${longitude}`);
-
-                    // Process the location data directly
-                    if (latitude && longitude) {
-                        await processLocationData(latitude, longitude);
-                    }
-                } catch (capacitorError) {
-                    console.error('Capacitor geolocation error:', capacitorError);
-                    throw capacitorError; // rethrow to be caught by the outer try/catch
+                    return;
                 }
+
+                // Process the location data
+                await processLocationData(position.coords.latitude, position.coords.longitude);
             } else {
                 // Using browser geolocation for web
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         (position) => {
-                            latitude = position.coords.latitude;
-                            longitude = position.coords.longitude;
-                            processLocationData(latitude, longitude);
+                            processLocationData(position.coords.latitude, position.coords.longitude);
                         },
                         (error) => {
                             console.error("Geolocation error:", error);
@@ -215,6 +172,27 @@ const Hero = () => {
         }
     };
 
+    const requestLocationPermission = async () => {
+        setDeliveryStatus(prev => ({
+            ...prev,
+            checking: true,
+            message: "Requesting location permission..."
+        }));
+
+        try {
+            await forceLocationPermissionPrompt();
+            // After permission is requested, check delivery location
+            checkDeliveryLocation();
+        } catch (error) {
+            console.error("Error requesting permission:", error);
+            setDeliveryStatus(prev => ({
+                ...prev,
+                checking: false,
+                message: "Could not request permission"
+            }));
+        }
+    };
+
     return (
         <div className="hero-container bg-gradient-to-r from-red-600 via-red-500 to-orange-500 py-16 md:py-24 relative overflow-hidden">
             {/* Decorative elements */}
@@ -311,23 +289,33 @@ const Hero = () => {
                                     {/* App Content */}
                                     <div className="p-4">
                                         {/* Delivery Status Banner - NEW HIGHLIGHTED SECTION */}
-                                        <div className={`mb-4 rounded-lg p-3 animate-fadeIn flex items-center gap-3 shadow-md border border-green-200 bg-green-50`}>
+                                        <div className={`mb-4 rounded-lg p-3 animate-fadeIn flex items-center gap-3 shadow-md border ${deliveryStatus.available ? 'border-green-200 bg-green-50' : (deliveryStatus.checking ? 'border-yellow-200 bg-yellow-50' : 'border-red-200 bg-red-50')}`}>
                                             <div className="relative flex-shrink-0">
-                                                <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-500">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                    </svg>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${deliveryStatus.available ? 'bg-green-500' : (deliveryStatus.checking ? 'bg-yellow-500' : 'bg-red-500')}`}>
+                                                    {deliveryStatus.available ? (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    ) : deliveryStatus.checking ? (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white animate-spin" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7.805V10a1 1 0 01-2 0V3a1 1 0 011-1z" clipRule="evenodd" />
+                                                        </svg>
+                                                    ) : (
+                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fillRule="evenodd" d="M8.257 3.099c.3-.921 1.603-.921 1.902 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                        </svg>
+                                                    )}
                                                 </div>
-                                                <div className={`absolute top-0 left-0 w-8 h-8 rounded-full bg-green-500 animate-ping ${animateLocation ? 'opacity-75' : 'opacity-0'}`}></div>
+                                                <div className={`absolute top-0 left-0 w-8 h-8 rounded-full bg-${deliveryStatus.available ? 'green' : (deliveryStatus.checking ? 'yellow' : 'red')}-500 animate-ping ${animateLocation ? 'opacity-75' : 'opacity-0'}`}></div>
                                             </div>
                                             <div className="flex-1">
-                                                <h4 className="font-bold text-base text-green-800">
-                                                    We Deliver to Your Area!
+                                                <h4 className={`font-bold text-base text-${deliveryStatus.available ? 'green' : (deliveryStatus.checking ? 'yellow' : 'red')}-800`}>
+                                                    {deliveryStatus.available ? 'We Deliver to Your Area!' : (deliveryStatus.checking ? 'Checking Delivery Availability...' : 'Location Permission Required')}
                                                 </h4>
-                                                <p className="text-sm text-green-700">
+                                                <p className={`text-sm text-${deliveryStatus.available ? 'green' : (deliveryStatus.checking ? 'yellow' : 'red')}-700`}>
                                                     {deliveryStatus.message}
                                                 </p>
-                                                {deliveryStatus.locationName && (
+                                                {deliveryStatus.locationName && deliveryStatus.available && (
                                                     <div className="flex items-center mt-1">
                                                         <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
                                                             Located in {deliveryStatus.locationName}
@@ -336,6 +324,14 @@ const Hero = () => {
                                                             • Fast Delivery Available
                                                         </span>
                                                     </div>
+                                                )}
+                                                {!deliveryStatus.available && !deliveryStatus.checking && (
+                                                    <button
+                                                        onClick={requestLocationPermission}
+                                                        className="mt-2 text-xs font-medium bg-red-600 text-white px-3 py-1 rounded-full hover:bg-red-700 transition-colors"
+                                                    >
+                                                        Request Permission
+                                                    </button>
                                                 )}
                                             </div>
                                         </div>
