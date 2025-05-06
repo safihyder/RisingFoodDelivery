@@ -45,5 +45,28 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is required to show nearby restaurants and deliver your food accurately.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is required to track delivery in real-time.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is needed to scan QR codes and take photos of delivered orders.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is needed for voice notes to delivery partners.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is needed to upload profile pictures and share food images.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>680371d0883fafd90d19.fra.appwrite.run</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 </dict>
 </plist>

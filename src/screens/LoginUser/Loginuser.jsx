@@ -50,6 +50,7 @@ const Loginuser = () => {
       email: true,
       password: true
     });
+
     // Validate all fields
     if (!formData.email || !formData.password) {
       setFormError('Please fill in all required fields');
@@ -266,6 +267,25 @@ const Loginuser = () => {
                 ) : (
                   'Login'
                 )}
+              </motion.button>
+              <motion.button
+                className={"flex items-center justify-center w-full px-4 py-2 space-x-3 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"}
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
+                animate={isSubmitting ? "disabled" : ""}
+                onClick={async () => {
+                  setIsSubmitting(true);
+                  await AuthService.loginWithGoogle();
+                }}
+              >
+                <img
+                  src="Images/google.png"
+                  alt="Google logo"
+                  className="w-5 h-5"
+
+                />
+                <span>Continue with Google</span>
               </motion.button>
             </form>
 

@@ -1,5 +1,5 @@
 import conf from "../conf/conf.js";
-import { Client, Account, ID } from "appwrite";
+import { Client, Account, ID, OAuthProvider } from "appwrite";
 export class AuthService {
     client = new Client();
     account;
@@ -22,6 +22,16 @@ export class AuthService {
     }
     async login(email, password) {
         return await this.account.createEmailPasswordSession(email, password);
+    }
+    async loginWithGoogle() {
+        try {
+            await this.account.createOAuth2Session(OAuthProvider.Google,
+                'http://localhost:5173',
+                'http://localhost:5173/error'
+            )
+        } catch (error) {
+            console.error(error)
+        }
     }
     async getCurrentUser() {
         try {
