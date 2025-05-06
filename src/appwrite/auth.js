@@ -26,8 +26,8 @@ export class AuthService {
     async loginWithGoogle() {
         try {
             await this.account.createOAuth2Session(OAuthProvider.Google,
-                'http://localhost:5173',
-                'http://localhost:5173/error'
+                'https://rising-food-delivery.vercel.app',
+                'https://rising-food-delivery.vercel.app/error'
             )
         } catch (error) {
             console.error(error)
